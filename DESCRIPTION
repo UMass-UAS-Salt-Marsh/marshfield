@@ -1,10 +1,27 @@
 Package: marshfield
-Title: What the Package Does (One Line, Title Case)
+Title: Plan and Process Vegetation Sampling for UMass UAS Project
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    person('Bradley', 'Compton', email = 'bcompton@umass.edu', role = c('aut', 'cre'), 
+       comment = c(ORCID = '0009-0002-2375-8116'))
+Description: A grab-bag package for planning a vegetation sampling field season for
+    the UMass UAS project (specifically, UMass UAS 2026), including formatting tide
+    tables, preparing a site shapefile, preparing maps for Avenza, summarizing field
+    samples on the fly, and processing collected data.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
+Language: en-US
+LazyData: true
+Imports:
+    terra (>= 1.8.73),
+    sf,
+    qrcode,
+    dplyr,
+    units,
+    grDevices,
+    utils,
+    zip
+Remotes:
+Suggests: 

@@ -3,7 +3,7 @@
 #' Reads a NOAA High/Low tide prediction file and prints a daily summary
 #' showing the primary daytime tides and a field-work quality rating based
 #' on how close the low tide falls to noon.
-#' 
+#'
 #' Get tide predictions from https://tidesandcurrents.noaa.gov/tide_predictions.html.
 #' I'm using station ESSEX, ESSEX RIVER 8441771
 #'
@@ -16,6 +16,7 @@
 #'   are rated \code{"no go"}.
 #' @return A data frame with one row per day, invisibly. Prints a formatted
 #'   summary as a side effect.
+#' @importFrom utils read.table
 #' @export
 
 
@@ -24,6 +25,8 @@ tide_summary <- function(path,
                          daylight_start = 6,
                          daylight_end   = 20,
                          cutoffs = c(excellent = 2, good = 4, fair = 5, poor = 6)) {
+
+
   df <- parse_noaa_tides(path)
 
   df_day <- df[df$hour_dec >= daylight_start & df$hour_dec <= daylight_end, ]
@@ -43,7 +46,7 @@ tide_summary <- function(path,
       after  <- highs[highs$hour_dec > best_low$hour_dec, ]
       before <- highs[highs$hour_dec < best_low$hour_dec, ]
       best_high <- if (nrow(after)  > 0) after[1, ]              else
-                   if (nrow(before) > 0) before[nrow(before), ]  else NULL
+        if (nrow(before) > 0) before[nrow(before), ]  else NULL
     } else if (nrow(highs) > 0) {
       best_high <- highs[which.min(abs(highs$hour_dec - 12)), ]
     }
@@ -78,13 +81,19 @@ tide_summary <- function(path,
   invisible(result)
 }
 
+
+
 #' Parse a NOAA High/Low tide prediction file
 #'
 #' @param path Path to the file.
 #' @return A data frame with columns: date_str, day_str, time_str, height,
 #'   hl, date, hour_dec.
 #' @export
+
+
 parse_noaa_tides <- function(path) {
+
+
   raw   <- readLines(path, warn = FALSE)
   start <- grep("^Date", raw)
   if (length(start) == 0) stop("No data header found in file: ", path)
@@ -102,15 +111,21 @@ parse_noaa_tides <- function(path) {
   )
 
   dt          <- as.POSIXct(paste(df$date_str, df$time_str),
-                             format = "%Y/%m/%d %I:%M %p")
+                            format = "%Y/%m/%d %I:%M %p")
   df$date     <- as.Date(df$date_str, format = "%Y/%m/%d")
   df$hour_dec <- as.numeric(format(dt, "%H")) + as.numeric(format(dt, "%M")) / 60
   df$height   <- as.numeric(df$height)
   df
 }
 
+
+
+
 # Assign a rating based on hours-from-noon thresholds
+
 rate_tide <- function(hrs, cutoffs) {
+
+
   if      (hrs <= cutoffs["excellent"]) "excellent"
   else if (hrs <= cutoffs["good"])      "good"
   else if (hrs <= cutoffs["fair"])      "fair"
@@ -118,8 +133,14 @@ rate_tide <- function(hrs, cutoffs) {
   else                                  "no go"
 }
 
+
+
+
 # Format a tide label: "L  8:16 am", "H 12:42 pm"
+
 fmt_tide <- function(hl, time_str) {
+
+
   if (is.na(time_str)) return(sprintf("%s       --", hl))
   m <- regmatches(time_str, regexec("^(\\d+):(\\d+) (AM|PM)$", time_str))[[1]]
   if (length(m) < 4) return(paste(hl, time_str))
