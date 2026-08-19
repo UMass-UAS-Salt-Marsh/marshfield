@@ -5,11 +5,16 @@
 #' Note some ugly hard-coded fixes: test data are dropped, and a missing date is added.
 #'
 #' @param source Path to source data file (.CSV)
+#' @param get_photos If TRUE, download all photos (checks to see if each exists first)
+#' @returns List of
+#'    - data = Full dataset
+#'    - z = Summarized data
 #' @importFrom utils read.csv
 #' @importFrom dplyr distinct
 
 
-subclass_freq <- function(source = 'C:/Work/saltmarsh/data/uas2026/field/plots/vegetation_records.csv') {
+subclass_freq <- function(source = 'C:/Work/saltmarsh/data/uas2026/field/plots/vegetation_records.csv',
+                          get_photos = FALSE) {
 
 
    data <- read.csv(source)
@@ -20,7 +25,13 @@ subclass_freq <- function(source = 'C:/Work/saltmarsh/data/uas2026/field/plots/v
    data$date[data$date == ''] <- '2026-08-05'   # Fix missing date for Andrew & Ava
 
 
-   table(data$site_name)
+   if(get_photos)
+      get_photos(unique(data$photo_filename))
+
+
+   cat('Sites:\n')
+   print(table(data$site_name))
+   cat('\n\n')
 
    x <- distinct(data, session_id, plot_number, subclass)
 
@@ -36,14 +47,16 @@ subclass_freq <- function(source = 'C:/Work/saltmarsh/data/uas2026/field/plots/v
    z <- rbind(z, c(NA, 'TOTAL', sum(z$freq)))
 
 
-   cat('Plots by date')
+   cat('Plots by date\n')
    d <- as.data.frame(table(distinct(data, session_id, date, plot_number)$date))
    names(d) <- c('Date', 'Count')
    d$Date <- as.character(d$Date)
    d <- rbind(d, c('Total', sum(as.numeric(d$Count))))
-   d
+   print(d)
+   cat('\n\n')
 
+   cat('Subclass count\n')
+   print(z)
 
-   cat('Subclass count')
-   z
+   invisible(list(data = data, z = z))
 }

@@ -5,11 +5,21 @@
 \title{Summzarize subclass frequency}
 \usage{
 subclass_freq(
-  source = "C:/Work/saltmarsh/data/uas2026/field/plots/vegetation_records.csv"
+  source = "C:/Work/saltmarsh/data/uas2026/field/plots/vegetation_records.csv",
+  get_photos = FALSE
 )
 }
 \arguments{
 \item{source}{Path to source data file (.CSV)}
+
+\item{get_photos}{If TRUE, download all photos (checks to see if each exists first)}
+}
+\value{
+List of
+\itemize{
+\item data = Full dataset
+\item z = Summarized data
+}
 }
 \description{
 Pulls draft database from UMass UAS 2026 field plots and summarizes subclass counts.
