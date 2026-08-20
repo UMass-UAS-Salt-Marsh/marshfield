@@ -4,11 +4,17 @@
 \alias{gather_rtk}
 \title{Gather RTK GPS points for UMass UAS 2026}
 \usage{
-gather_rtk(path = "C:/Work/saltmarsh/data/uas2026/field/RTK")
+gather_rtk(
+  path = "C:/Work/saltmarsh/data/uas2026/field/RTK",
+  result = "C:/Work/saltmarsh/data/uas2026/field/prelim/rtk.gpkg"
+)
 }
 \arguments{
 \item{path}{Path to folder of RTK files (.CSVs with nothing else in folder)}
+
+\item{result}{Path and filename of preliminary result file}
 }
 \description{
-Gather RTK GPS points for UMass UAS 2026
+EPSG:6491    # Mass Mainland NAD83(2011)
+EDAL point data abstraction library (part)
 }
