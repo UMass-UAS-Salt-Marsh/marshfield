@@ -12,9 +12,13 @@ gather_rtk(
 \arguments{
 \item{path}{Path to folder of RTK files (.CSVs with nothing else in folder)}
 
-\item{result}{Path and filename of preliminary result file}
+\item{result}{Path and filename of preliminary result file; use NULL to skip writing it}
+}
+\value{
+An sf object of RTK points with Easting, Northing, and Elevation
 }
 \description{
-EPSG:6491    # Mass Mainland NAD83(2011)
-EDAL point data abstraction library (part)
+Reads RTK points from Emlid files and reprojects to NAD83(2011) / Massachusetts
+Mainland + NAVD88(GEOID18) height. Optionally writes a preliminary geopackage of all
+RTK points.
 }

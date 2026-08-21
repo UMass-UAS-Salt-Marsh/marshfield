@@ -1,10 +1,12 @@
 #' Gather RTK GPS points for UMass UAS 2026
 #'
-#' EPSG:6491    # Mass Mainland NAD83(2011)
-#' EDAL point data abstraction library (part)
+#' Reads RTK points from Emlid files and reprojects to NAD83(2011) / Massachusetts
+#' Mainland + NAVD88(GEOID18) height. Optionally writes a preliminary geopackage of all
+#' RTK points.
 #'
 #' @param path Path to folder of RTK files (.CSVs with nothing else in folder)
-#' @param result Path and filename of preliminary result file
+#' @param result Path and filename of preliminary result file; use NULL to skip writing it
+#' @returns An sf object of RTK points with Easting, Northing, and Elevation
 #' @importFrom utils read.csv
 #' @export
 
@@ -31,6 +33,11 @@ gather_rtk <- function(path = 'C:/Work/saltmarsh/data/uas2026/field/RTK',
    y <- reproj_rtk(z)      # reproject and validate RTK points
 
    q <- st_as_sf(y, coords = c('Easting', 'Northing', 'Elevation'), crs = 'EPSG:6491+5703')
-   st_write(q, result, append = FALSE)
-   message(nrow(y), ' points projected and written to ', result)
+
+   if(!is.null(result)) {
+      st_write(q, result, append = FALSE)
+      message(nrow(y), ' points projected and preliminary version written to ', result)
+   }
+
+   invisible(q)
 }
