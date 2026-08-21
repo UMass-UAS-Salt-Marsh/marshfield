@@ -4,28 +4,31 @@
 #'
 #' Note some ugly hard-coded fixes: test data are dropped, and a missing date is added.
 #'
-#' @param source Path to source data file (.CSV)
+#' @param path Path to source data
+#' @param plot_file Name of plots file from Salt Marsh Data
+#' @param session_file Name of sessions file from Salt Marsh data
+#' @param rtk_dir Path to directory of RTK CSVs from Emlid
 #' @param get_photos If TRUE, download all photos (checks to see if each exists first)
 #' @returns List of
 #'    - data = Full dataset
 #'    - z = Summarized data
 #' @importFrom utils read.csv
 #' @importFrom dplyr distinct
-#'
+#' @export
 
 
 get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field/',
-                      plots = 'plots/vegetation_records.csv',
-                      sessions = 'plots/field_sessions.csv',
-                      rtk = 'RTK',
+                      plot_file = 'plots/vegetation_records.csv',
+                      session_file = 'plots/field_sessions.csv',
+                      rtk_dir = 'RTK',
                       get_photos = FALSE) {
 
 
-   rtk <- gather_rtk(path = file.path(path, rtk), result = NULL)           # gather and reproject RTK points from Emlid downloads
+   rtk <- gather_rtk(path = file.path(path, rtk_dir), result = NULL)           # gather and reproject RTK points from Emlid downloads
 
 
-   plots <- read.csv(file.path(path, plots))
-   sessions <- read.csv(file.path(path, sessions))
+   plots <- read.csv(file.path(path, plot_file))
+   sessions <- read.csv(file.path(path, session_file))
 
 
 
@@ -41,15 +44,30 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field/',
    plots <<- plots
    sessions <<- sessions
 
+ #  return()
+
+   plots$orig_plot_ids <- plots$plot_ids
+   # ....... and other stuff I'll change
+
 
    # fix missing plot ids
    plotno <- suppressWarnings(as.numeric(plots$plot_id))
    bad <- !is.na(plotno)                                    # plot ids that weren't set, and thus were assigned 1, 2, 3, ...
-   x <- strsplit(plots$site_name[bad], '-')
+   fixable <- valid_plotids(plots$site)
+   x <- strsplit(plots$site_name[bad & fixable], '-')
    plots$old_plot_id <- plots$plot_id
-   plots$plot_id[bad] <- paste(sapply(x, '[[', 1), sapply(x, '[[', 2), sprintf('%03d', plotno[bad]), sep = '-')
+   plots$plot_id[bad & fixable] <- paste(sapply(x, '[[', 1), sapply(x, '[[', 2), sprintf('%03d', plotno[bad & fixable]), sep = '-')
 
-   # fix plot ids
+
+   # correct plot ids
+   plots$plot_id <- correct_plotids(plots$plot_id)          # clean up formatting of all plot ids, and add section 00 if necessary
+   bad <- !valid_plotids(plots$plot_id)
+   if(any(bad)) {
+      print('Bad plot ids:')
+      print(cbind(1:nrow(plots), plots$plot_id)[bad])
+      stop()
+   }
+
    # split out percent cover to a separate table and collapse plots table
    # fix missing/incorrect dates
    # fix RTK ids

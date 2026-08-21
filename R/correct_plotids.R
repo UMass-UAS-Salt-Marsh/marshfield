@@ -30,7 +30,7 @@ correct_plotids <- function(x) {
 
    y1 <- paste0(substring(y1, 1, 2), sprintf('%02d', as.numeric(substring(y1, 3))))
    y2 <- sprintf('%02d', as.numeric(y2))
-   y3 <- sprintf('%03d', as.numeric(y3))
+   y3 <- sprintf('%03d', suppressWarnings(as.numeric(y3)))
 
-   z <- paste(y1, y2, y3, sep = '-')
+   paste(y1, y2, y3, sep = '-')
 }

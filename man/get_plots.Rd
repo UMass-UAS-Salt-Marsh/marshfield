@@ -6,16 +6,22 @@
 \usage{
 get_plots(
   path = "C:/Work/saltmarsh/data/uas2026/field/",
-  plots = "plots/vegetation_records.csv",
-  sessions = "plots/field_sessions.csv",
-  rtk = "RTK",
+  plot_file = "plots/vegetation_records.csv",
+  session_file = "plots/field_sessions.csv",
+  rtk_dir = "RTK",
   get_photos = FALSE
 )
 }
 \arguments{
-\item{get_photos}{If TRUE, download all photos (checks to see if each exists first)}
+\item{path}{Path to source data}
 
-\item{source}{Path to source data file (.CSV)}
+\item{plot_file}{Name of plots file from Salt Marsh Data}
+
+\item{session_file}{Name of sessions file from Salt Marsh data}
+
+\item{rtk_dir}{Path to directory of RTK CSVs from Emlid}
+
+\item{get_photos}{If TRUE, download all photos (checks to see if each exists first)}
 }
 \value{
 List of
