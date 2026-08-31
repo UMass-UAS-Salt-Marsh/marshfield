@@ -3,7 +3,7 @@
 export(PIPE_2018)
 export(assign_plots)
 export(avenza_qr)
-export(correct_plotids)
+export(clean_plotids)
 export(format_sections)
 export(gather_rtk)
 export(get_photos)

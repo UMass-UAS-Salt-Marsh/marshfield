@@ -1,4 +1,4 @@
-#' Summzarize subclass frequency
+#' Summzarize subclass frequency for within-field season updates
 #'
 #' Pulls draft database from UMass UAS 2026 field plots and summarizes subclass counts.
 #'

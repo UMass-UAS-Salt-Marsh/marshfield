@@ -1,4 +1,4 @@
-#' Make a site shapefile
+#' Make final site shapefile from draft shapefile
 #'
 #' Start with polygons for selected parcels. Buffers roads, structures and golf courses by specified
 #' distance for drone safety (use 50 m for Wingtra One). Produces final shapefile and reports area in

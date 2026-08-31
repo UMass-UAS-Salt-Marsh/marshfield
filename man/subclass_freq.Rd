@@ -2,7 +2,7 @@
 % Please edit documentation in R/subclass_freq.R
 \name{subclass_freq}
 \alias{subclass_freq}
-\title{Summzarize subclass frequency}
+\title{Summzarize subclass frequency for within-field season updates}
 \usage{
 subclass_freq(
   source = "C:/Work/saltmarsh/data/uas2026/field/plots/vegetation_records.csv",

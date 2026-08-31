@@ -1,4 +1,4 @@
-#' Correct plot ids for UMass UAS 2026
+#' Clean plot ids for UMass UAS 2026
 #'
 #' Valid ids are in the form <tablet letter><month><day>-<section>-<plot no>. Valid tablet letters are
 #' B - blue, P - pink, J - jet black. Valid month letters are J - July, A - August. The day should be 2
@@ -15,7 +15,7 @@
 #' @export
 
 
-correct_plotids <- function(x) {
+clean_plotids <- function(x) {
 
 
    y <- strsplit(toupper(x), '-')

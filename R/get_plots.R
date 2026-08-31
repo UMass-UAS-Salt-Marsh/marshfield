@@ -1,4 +1,4 @@
-#' Summzarize subclass frequency
+#' Top-level function to clean up and process field data
 #'
 #' Pulls draft database from UMass UAS 2026 field plots and summarizes subclass counts.
 #'

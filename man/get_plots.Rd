@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_plots.R
 \name{get_plots}
 \alias{get_plots}
-\title{Summzarize subclass frequency}
+\title{Top-level function to clean up and process field data}
 \usage{
 get_plots(
   path = "C:/Work/saltmarsh/data/uas2026/field/",

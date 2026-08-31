@@ -2,7 +2,7 @@
 % Please edit documentation in R/make_site.R
 \name{make_site}
 \alias{make_site}
-\title{Make a site shapefile}
+\title{Make final site shapefile from draft shapefile}
 \usage{
 make_site(
   target = "castle.shp",
