@@ -59,8 +59,8 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field/',
    plots$plot_id[bad & fixable] <- paste(sapply(x, '[[', 1), sapply(x, '[[', 2), sprintf('%03d', plotno[bad & fixable]), sep = '-')
 
 
-   # correct plot ids
-   plots$plot_id <- correct_plotids(plots$plot_id)          # clean up formatting of all plot ids, and add section 00 if necessary
+   # clean plot ids
+   plots$plot_id <- clean_plotids(plots$plot_id)            # clean up formatting of all plot ids, and add section 00 if necessary
    bad <- !valid_plotids(plots$plot_id)
    if(any(bad)) {
       print('Bad plot ids:')

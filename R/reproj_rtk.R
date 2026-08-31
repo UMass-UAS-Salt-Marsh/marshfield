@@ -1,3 +1,17 @@
+## Pinned operation, verified 2026 against ~800 plots that Emlid had already
+## computed with its own on-device GEOID18. Pinned so a PROJ upgrade can't
+## silently substitute a different geoid (GEOID12B differs from GEOID18 by only
+## a few cm in MA - it would look fine and be wrong). Change only after
+## re-running with pipeline = NULL and confirming the checks still pass.
+
+PIPE_2018 <- paste0(
+   '+proj=pipeline ',
+   '+step +proj=unitconvert +xy_in=deg +xy_out=rad ',
+   '+step +inv +proj=vgridshift +grids=us_noaa_g2018u0.tif +multiplier=1 ',
+   '+step +proj=lcc +lat_0=41 +lon_0=-71.5 +lat_1=42.6833333333333 ',
+   '+lat_2=41.7166666666667 +x_0=200000 +y_0=750000 +ellps=GRS80')
+
+
 #' Reproject RTK points from Emlid to EPSG:6491+5703
 #'
 #' NAD83(2011) / Massachusetts Mainland + NAVD88(GEOID18) height.
@@ -14,22 +28,8 @@
 #' @returns x with old_easting/old_northing/old_elevation/old_cs_name retained
 #'   and Easting/Northing/Elevation/CS.name replaced. Provenance in attr(., 'reproj').
 #' @importFrom sf sf_proj_network sf_proj_pipelines sf_project st_crs st_as_sf st_transform st_coordinates sf_extSoftVersion
+#' @importFrom utils packageVersion
 #' @export
-
-
-## Pinned operation, verified 2026 against ~800 plots that Emlid had already
-## computed with its own on-device GEOID18. Pinned so a PROJ upgrade can't
-## silently substitute a different geoid (GEOID12B differs from GEOID18 by only
-## a few cm in MA - it would look fine and be wrong). Change only after
-## re-running with pipeline = NULL and confirming the checks still pass.
-
-PIPE_2018 <- paste0(
-   '+proj=pipeline ',
-   '+step +proj=unitconvert +xy_in=deg +xy_out=rad ',
-   '+step +inv +proj=vgridshift +grids=us_noaa_g2018u0.tif +multiplier=1 ',
-   '+step +proj=lcc +lat_0=41 +lon_0=-71.5 +lat_1=42.6833333333333 ',
-   '+lat_2=41.7166666666667 +x_0=200000 +y_0=750000 +ellps=GRS80')
-
 
 reproj_rtk <- function(x, pipeline = PIPE_2018, tol_mm = 2, validate = TRUE) {
 

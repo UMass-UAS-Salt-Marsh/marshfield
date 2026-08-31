@@ -23,7 +23,7 @@ get_photos <- function(urls, dest_dir = 'C:/Work/saltmarsh/data/uas2026/field/ph
       if (file.exists(dests[i])) next          # resumable
       tryCatch(
          curl::curl_download(urls[i], dests[i], mode = "wb"),
-         error = function(e) message("Failed: ", urls[i], " — ", conditionMessage(e))
+         error = function(e) message("Failed: ", urls[i], " - ", conditionMessage(e))
       )
    }
 
