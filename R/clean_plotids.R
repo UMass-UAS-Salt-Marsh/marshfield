@@ -18,6 +18,10 @@
 clean_plotids <- function(x) {
 
 
+   if(any(!valid_plotids(x)))
+      stop('clean_plotids may only be called for valid plot ids')
+
+
    y <- strsplit(toupper(x), '-')
    l <- sapply(y, length)
    for(i in 1:length(y))

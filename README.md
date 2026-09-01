@@ -27,3 +27,5 @@ Companion package to [marshmap](https://github.com/UMass-UAS-Salt-Marsh/marshmap
 - **clean_plotids** - Clean plot ids for UMass UAS 2026
 - **gather_rtk** - Gather RTK GPS points for UMass UAS 2026
 - **reproj_rtk** - Reproject RTK points from Emlid to EPSG:6491+5703
+- **valid_rtkids** - Return TRUE for fields where the RTK id is valid for UMass UAS 2026
+- **clean_rtkids** - Clean RTK ids for UMass UAS 2026

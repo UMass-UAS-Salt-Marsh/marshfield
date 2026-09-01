@@ -40,11 +40,11 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field/',
       get_photos(unique(plots$photo_filename))
 
 
-
+   rtk <<- rtk
    plots <<- plots
    sessions <<- sessions
 
- #  return()
+   return()
 
    plots$orig_plot_ids <- plots$plot_ids
    # ....... and other stuff I'll change
