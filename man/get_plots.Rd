@@ -9,7 +9,8 @@ get_plots(
   plot_file = "plots/vegetation_records.csv",
   session_file = "plots/field_sessions.csv",
   rtk_dir = "RTK",
-  get_photos = FALSE
+  get_photos = FALSE,
+  stop_on_error = FALSE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ get_plots(
 \item{rtk_dir}{Path to directory of RTK CSVs from Emlid}
 
 \item{get_photos}{If TRUE, download all photos (checks to see if each exists first)}
+
+\item{stop_on_error}{If TRUE, throw an error if there are any bad plot ids or RTK ids}
 }
 \value{
 List of

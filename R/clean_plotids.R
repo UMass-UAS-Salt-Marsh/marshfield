@@ -7,8 +7,7 @@
 #' section is assumed to be 00.
 #'
 #' To check whether a plot id is valid (ignoring) formatting niceties, use the companion function
-#' `valid_plotids`. You must use `valid_plotids` before calling this function to avoid corrupting plot
-#' ids by reformatting bad ids.
+#' `valid_plotids`.
 #'
 #' @param x A vector of plot ids
 #' @returns A vector of plot ids with the formatting cleaned up
@@ -18,12 +17,9 @@
 clean_plotids <- function(x) {
 
 
-   if(any(!valid_plotids(x)))
-      stop('clean_plotids may only be called for valid plot ids')
-
-
    y <- strsplit(toupper(x), '-')
-   l <- sapply(y, length)
+
+   l <- sapply(y, length)                       # if section number is missing, add section 00
    for(i in 1:length(y))
       if(l[i] == 2)
          y[[i]] <- c(y[[i]][[1]], '00', y[[i]][[2]])
@@ -36,5 +32,11 @@ clean_plotids <- function(x) {
    y2 <- sprintf('%02d', as.numeric(y2))
    y3 <- sprintf('%03d', suppressWarnings(as.numeric(y3)))
 
-   paste(y1, y2, y3, sep = '-')
+   z <- paste(y1, y2, y3, sep = '-')
+
+
+   v <- valid_plotids(z)                        # undo changes that leave invalid ids
+   z[!v] <- x[!v]
+
+   z
 }

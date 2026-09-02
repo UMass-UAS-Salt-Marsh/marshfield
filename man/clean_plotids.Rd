@@ -21,6 +21,5 @@ section is assumed to be 00.
 }
 \details{
 To check whether a plot id is valid (ignoring) formatting niceties, use the companion function
-\code{valid_plotids}. You must use \code{valid_plotids} before calling this function to avoid corrupting plot
-ids by reformatting bad ids.
+\code{valid_plotids}.
 }
