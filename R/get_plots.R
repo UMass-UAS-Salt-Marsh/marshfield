@@ -18,6 +18,7 @@
 #' @importFrom stringi stri_extract_first_regex
 #' @importFrom exifr read_exif
 #' @importFrom lubridate ymd_hms with_tz
+#' @importFrom sf st_crs st_transform st_as_sf st_coordinates
 #' @export
 
 
@@ -195,9 +196,22 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    x <- merge(plots, rtk, by.x = 'rtk_point_number', by.y = 'Name', all.y = FALSE)
    d <- data.frame(plotid = x$plot_id, rtk_id = x$rtk_point_number, photo_date = x$photo_date, rtk_date = x$date.y, delta = difftime(x$photo_date, x$date.y), delta_lag_1 = difftime(x$photo_date, c(0, x$date.y[-nrow(x)])))
    d$lag_better <- abs(d$delta_lag_1) < abs(d$delta)
+
+   tab <- st_as_sf(x, coords = c('latitude', 'longitude')[c(2, 1)])
+   st_crs(tab) <- 'EPSG:4326'
+   tab <- st_transform(tab, crs = 'EPSG:6491')
+   x[, c('tablet_easting', 'tablet_northing')] <- st_coordinates(tab)
+
+   d$dist <- sqrt((x$Easting - x$tablet_easting)^2 + (x$Northing - x$tablet_northing)^2)
+   d$dist_lag_1 <-sqrt(   ((x$Easting - c(0, x$tablet_easting[-nrow(x)]))^2) + ((x$Northing - c(0, x$tablet_northing[-nrow(x)]))^2))
+
+   d$dist[d$dist > 100] <- NA                                  # if the distance is > 100 m, it's worthless
+   d$dist_lag_1[d$dist_lag_1 > 100] <- NA                      # if the distance is > 100 m, it's worthless
+
    d$notes <- x$notes
 
-   rtk_times <<- d
+
+   rtk_diag <<- d                                              # save table of RTK error diagnostics
 
 
    # flag non-continuous RTK ids
