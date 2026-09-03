@@ -15,7 +15,7 @@ gather_rtk(
 \item{result}{Path and filename of preliminary result file; use NULL to skip writing it}
 }
 \value{
-An sf object of RTK points with Easting, Northing, and Elevation
+Data frame of RTK points with all info
 }
 \description{
 Reads RTK points from Emlid files and reprojects to NAD83(2011) / Massachusetts

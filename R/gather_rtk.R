@@ -6,7 +6,7 @@
 #'
 #' @param path Path to folder of RTK files (.CSVs with nothing else in folder)
 #' @param result Path and filename of preliminary result file; use NULL to skip writing it
-#' @returns An sf object of RTK points with Easting, Northing, and Elevation
+#' @returns Data frame of RTK points with all info
 #' @importFrom utils read.csv
 #' @export
 
@@ -39,5 +39,5 @@ gather_rtk <- function(path = 'C:/Work/saltmarsh/data/uas2026/field/RTK',
       message(nrow(y), ' points projected and preliminary version written to ', result)
    }
 
-   invisible(q)
+   invisible(y)
 }

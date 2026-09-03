@@ -19,9 +19,9 @@ clean_rtkids <- function(x) {
    y <- strsplit(toupper(x), '-')
    l <- sapply(y, length)
 
-   for(i in 1:length(y))                        # if there's a section number, drop it
+   for(i in 1:length(y))                        # if there's a section number, drop it and include a digit (0) in the RTK id
       if(l[i] == 3)
-         y[[i]] <- c(y[[i]][[1]], y[[i]][[3]])
+         y[[i]] <- c(sub('([WXYZ])(\\d{0,1}[JA])', '\\10\\2', y[[i]][[1]]), y[[i]][[3]])
 
 
    w <- sapply(y, length) == 2                  # we're only going to work with ids that have two elements (after fixing 3)

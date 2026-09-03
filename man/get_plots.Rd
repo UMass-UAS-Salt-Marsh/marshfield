@@ -5,7 +5,7 @@
 \title{Top-level function to clean up and process field data}
 \usage{
 get_plots(
-  path = "C:/Work/saltmarsh/data/uas2026/field/",
+  path = "C:/Work/saltmarsh/data/uas2026/field",
   plot_file = "plots/vegetation_records.csv",
   session_file = "plots/field_sessions.csv",
   rtk_dir = "RTK",

@@ -6,7 +6,7 @@
 #' @export
 
 
-get_photos <- function(urls, dest_dir = 'C:/Work/saltmarsh/data/uas2026/field/photos') {
+get_photos <- function(urls, dest_dir = 'C:/Work/saltmarsh/data/uas2026/field/photos/downloads') {
 
 
    dests <- file.path(dest_dir, basename(urls))

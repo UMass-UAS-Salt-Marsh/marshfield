@@ -4,7 +4,10 @@
 \alias{get_photos}
 \title{Download plot photos from the server}
 \usage{
-get_photos(urls, dest_dir = "C:/Work/saltmarsh/data/uas2026/field/photos")
+get_photos(
+  urls,
+  dest_dir = "C:/Work/saltmarsh/data/uas2026/field/photos/downloads"
+)
 }
 \arguments{
 \item{urls}{Vector of photo URLs}
