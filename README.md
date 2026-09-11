@@ -29,3 +29,22 @@ Companion package to [marshmap](https://github.com/UMass-UAS-Salt-Marsh/marshmap
 - **reproj_rtk** - Reproject RTK points from Emlid to EPSG:6491+5703
 - **valid_rtkids** - Return TRUE for fields where the RTK id is valid for UMass UAS 2026
 - **clean_rtkids** - Clean RTK ids for UMass UAS 2026
+- **flag_rtk** - Try to find RTK errors
+
+
+## Processing field data
+
+Call `get_plots()` to process plot data. 
+
+### Field data processing parameters
+
+- pars/drop_plots.txt has plots to drop. Columns:
+   1. `plot_id` Plot id, exact match
+   2. `drop_confirmed` TRUE if final decision
+   3. `drop_reason` Why is plot to be dropped?
+   
+- pars/correct_rtk.txt. Columns:
+   1. `plot_id` Plot id, exact match
+   2. `new_rtk_id` New RTK id, exact match
+   3. `fix_rtk_confirmed` TRUE if final decision
+   4. `fix_rtk_reason` Why is RTK id being changed?

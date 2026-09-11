@@ -18,7 +18,7 @@
 #' @importFrom stringi stri_extract_first_regex
 #' @importFrom exifr read_exif
 #' @importFrom lubridate ymd_hms with_tz
-#' @importFrom sf st_crs st_transform st_as_sf st_coordinates
+#' @importFrom sf st_crs<- st_transform st_as_sf st_coordinates
 #' @export
 
 
@@ -132,7 +132,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
    d <- duplicated(plots$rtk_point_number)
    if(any(d)) {
-      cat('\nDuplicated RTK ids in plot data:\n')
+      cat('\n', sum(d), ' duplicated RTK ids in plot data:\n')
       d <- plots$rtk_point_number %in% plots$rtk_point_number[d]
       print(data.frame(row = 1:nrow(plots), rtk_point_number = plots$rtk_point_number, old_rtk_point_number = plots$old_rtk_point_number, notes = plots$notes)[d,], quote = FALSE, row.names = FALSE)
       rtk$rtkid_dup[d] <- TRUE
@@ -178,7 +178,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    d <- list.files(p)
    invisible(file.remove(file.path(p, d)))
 
-   cat('\nCopying photos to ', p, '...\n')
+   cat('\nCopying photos to ', p, '...\n', sep = '')
    r <- file.path(p, paste0(plots$plot_id[b], '.jpg'))
    e <- file.copy(f, r, recursive = FALSE)
    if(any(!e))
@@ -216,6 +216,43 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
    # flag non-continuous RTK ids
 
+   flag_rtk(plots, rtk)             # ...................... try to find RTK errors .....................
+
+
+
+   # drop bad plots and correct bad RTKs from parameter files
+   # dropped gets dropped plots, with drop_confirmd and drop_reason
+   # plots gets all plots that were not dropped
+
+   drop <- read.table(file.path(path, 'pars/drop_plots.txt'), sep = '\t', header = TRUE)
+   drop$drop <- TRUE
+   plots <- merge(plots, drop, by = 'plot_id', all.x = TRUE)
+   plots$drop[is.na(plots$drop)] <- FALSE
+   dropped <- plots[plots$drop, ]
+   plots <- plots[!plots$drop, !names(plots) %in% c('drop_confirmed', 'drop_reason', 'drop')]
+
+   message(nrow(dropped), ' plots dropped; ', nrow(plots), ' remaining')
+
+
+   fix_rtk <- read.table(file.path(path, 'pars/fix_rtk.txt'), sep = '\t', header = TRUE)
+   plots <- merge(plots, fix_rtk, by = 'plot_id', all.x = TRUE)
+   plots$fix_rtk_confirmed[is.na(plots$fix_rtk_confirmed)] <- FALSE
+   plots$fix_rtk_reason[is.na(plots$fix_rtk_reason)] <- ''
+   plots <- plots[, !names(plots) %in% 'new_rtk_id']
+
+   b <- !is.na(plots$new_rtk_id)
+   plots$rtk_point_number[b] <- plots$new_rtk_id[b]
+
+   # Check again for duplicated RTK ids in plot data
+
+   d <- duplicated(plots$rtk_point_number)
+   if(any(d)) {
+      cat('\nAfter RTK corrections, ', sum(d), ' duplicated RTK ids in plot data:\n', sep = '')
+      d <- plots$rtk_point_number %in% plots$rtk_point_number[d]
+      print(data.frame(row = 1:nrow(plots), rtk_point_number = plots$rtk_point_number, old_rtk_point_number = plots$old_rtk_point_number, notes = plots$notes)[d,], quote = FALSE, row.names = FALSE)
+      rtk$rtkid_dup[d] <- TRUE
+      err <- TRUE
+   }
 
 
 
@@ -229,10 +266,17 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
 
-   rtk <<- rtk
+
+
+
+
    plots <<- plots
+   dropped <<- dropped
+   rtk <<- rtk
    pct_cover <<- pct_cover
    sessions <<- sessions
+   primary <<- primary
+   aux <<- aux
 
 
 
