@@ -26,7 +26,7 @@ clean_rtkids <- function(x) {
 
    w <- sapply(y, length) == 2                  # we're only going to work with ids that have two elements (after fixing 3)
 
-   y1 <- sapply(y[w], '[[', 1)                  # part 1: tablet and date
+   y1 <- sapply(y[w], '[[', 1)                  # part 1: RTK unit and date
    y2 <- sapply(y[w], '[[', 2)                  # part 2: point number
 
    y1 <- paste0(substring(y1, 1, 2), sprintf('%02d', suppressWarnings(as.numeric(substring(y1, 3)))))

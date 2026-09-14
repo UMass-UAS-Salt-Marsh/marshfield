@@ -1,28 +1,70 @@
 #' Try to find RTK errors
 #'
-#' ...............this is a stub. also want to bring time differences in, come up with a way to flag iffy-looking RTKs
+#' Flag plots with RTK that may be off by one. The only error I expect is when an RTK was not
+#' taken for a plot, so the plot is auto-assigned the RTK for the next plot. RTK ids will lag
+#' until field crew notices and readjusts (or traces down the error and fixes it in the field).
+#'
+#' Note that a handful of RTKs were taken out of sequence, as in RTK failures and flagging on
+#' day 1.
 #'
 #' @param plots Plots data frame
-#' @parem rtk RTK data frame
+#' @param rtk RTK data frame
+#' @returns A data frame with lots of confusing info
 #' @export
 
 
-flag_rtk <- function(plots, rtk) {
+flag_rtk <- function(plots, rtk, path) {
 
 
-   x <- merge(plots, rtk, by.x = 'rtk_point_number', by.y = 'Name', all.y = FALSE)
-   d <- data.frame(plotid = x$plot_id, rtk_id = x$rtk_point_number, photo_date = x$photo_date, rtk_date = x$date.y, delta = difftime(x$photo_date, x$date.y), delta_lag_1 = difftime(x$photo_date, c(0, x$date.y[-nrow(x)])))
-   d$lag_better <- abs(d$delta_lag_1) < abs(d$delta)
-   tab <- st_as_sf(x, coords = c('latitude', 'longitude')[c(2, 1)])
+# first, compare plot time (from photo) with RTK time
+   p <- plots
+   p[, c('tablet_lat', 'tablet_long')] <- p[, c('latitude', 'longitude')]
+   x <- merge(p, rtk, by.x = 'rtk_point_number', by.y = 'Name', all.y = FALSE)
+   x <- x[order(x$plot_id), ]
+   d <- data.frame(plot_id = x$plot_id, rtk_id = x$rtk_point_number,
+                   photo_date = x$photo_date, rtk_date = x$date.y,
+                   rtk_easting = x$Easting, rtk_northing = x$Northing,
+                   tablet_lat = x$tablet_lat, tablet_long = x$tablet_long,
+                   observers = x$observers, comment = x$notes)
+
+   d <- sort_plots(d, path)
+
+
+   d$delta <- as.numeric(as.duration(difftime(d$photo_date, d$rtk_date))) / 60  # how long RTK was taken before photo (minutes)
+   b <- abs(d$delta) > 10                                                     # ignore deltas > 10 min
+   d$delta[b] <- NA
+   hist(d$delta, nclass = 25)
+
+   d$delta_lag_1 <- as.numeric(as.duration(difftime(d$photo_date, c(0, d$rtk_date[-nrow(d)])))) /60  # how long RTK was taken before previous photo (min)
+   b <- abs(d$delta_lag_1) > 25                                                     # ignore deltas > 10 min
+   d$delta_lag_1[b] <- NA
+   hist(d$delta_lag_1, nclass = 25)
+   plot(d$delta, d$delta_lag_1, pch = 19)
+
+   d$time_lag_better <- abs(d$delta_lag_1) < abs(d$delta)
+
+
+
+   # second, compare tablet GPS with RTK GPS
+
+   tab <- st_as_sf(d, coords = c('tablet_lat', 'tablet_long')[c(2, 1)])
    st_crs(tab) <- 'EPSG:4326'
    tab <- st_transform(tab, crs = 'EPSG:6491')
-   x[, c('tablet_easting', 'tablet_northing')] <- st_coordinates(tab)
+   d[, c('tablet_easting', 'tablet_northing')] <- st_coordinates(tab)
 
-   d$dist <- sqrt((x$Easting - x$tablet_easting)^2 + (x$Northing - x$tablet_northing)^2)
-   ####### d$dist_lag_1 <- sqrt(((x$Easting - c(0, x$tablet_easting[-nrow(x)]))^2) + (x$Northing - c(0, x$tablet_northing[-nrow(x)])^2))   # this is wrong
+   d$dist <-       sqrt((d$rtk_easting - d$tablet_easting)^2 + (d$rtk_northing - d$tablet_northing)^2)
+   d$dist_lag_1 <- sqrt((d$rtk_easting - c(0, d$tablet_easting[-nrow(d)]))^2 + (d$rtk_northing - c(0, d$tablet_northing[-nrow(d)]))^2)
 
-   d$dist[d$dist > 100] <- NA
+   d$dist[d$dist > 30] <- NA
    hist(d$dist, nclass = 25)
    summary(d$dist)
 
+   d$dist_lag_1[d$dist_lag_1 > 30] <- NA
+   hist(d$dist_lag_1, nclass = 25)
+   summary(d$dist_lag_1)
+   plot(d$dist, d$dist_lag_1, pch = 19)
+
+   d$dist_lag_better <- abs(d$dist_lag_1) < abs(d$dist)
+
+   d
 }

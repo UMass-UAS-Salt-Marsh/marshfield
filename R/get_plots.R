@@ -37,7 +37,6 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    sessions <- read.csv(file.path(path, session_file))
 
 
-
    ### Remove test data that's still up on the server ###
    plots <- plots[!plots$site_name %in% c('beech hill', 'Beech Hill Road', 'blue test', 'hoop', 'Office', 'photos', 'pink test', 'test', 'test Aug 2', 'yard', 'yard2', 'yard03'), ]
 
@@ -216,7 +215,11 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
    # flag non-continuous RTK ids
 
-   flag_rtk(plots, rtk)             # ...................... try to find RTK errors .....................
+
+   plots<<-plots;path<<-path;return()
+
+   plots <- sort(plots, path)                                  # we need plots sorted here
+   flag_rtk(plots, rtk, path)             # ...................... try to find RTK errors .....................
 
 
 
