@@ -8,7 +8,7 @@
 plot_comments <- function(x = plots) {
 
 
-   z <- x[x$notes != '', c('plot_id', 'subclass', 'rtk_point_number', 'observers', 'photo_date', 'plotid_err', 'rtkid_err', 'notes')]
+   z <- x[x$notes != '', c('plot_id', 'subclass', 'rtk_id', 'observers', 'photo_date', 'plotid_err', 'rtkid_err', 'notes')]
    print(z, right = FALSE)
    invisible(z)
 

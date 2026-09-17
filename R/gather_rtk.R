@@ -6,19 +6,21 @@
 #'
 #' @param path Path to folder of RTK files (.CSVs with nothing else in folder)
 #' @param result Path and filename of preliminary result file; use NULL to skip writing it
+#' @param rename_file Path and filename to specify column renaming and dropping
 #' @returns Data frame of RTK points with all info
 #' @importFrom utils read.csv
 #' @export
 
 
 gather_rtk <- function(path = 'C:/Work/saltmarsh/data/uas2026/field/RTK',
-                       result = 'C:/Work/saltmarsh/data/uas2026/field/prelim/rtk.gpkg') {
+                       result = 'C:/Work/saltmarsh/data/uas2026/field/prelim/rtk.gpkg',
+                       rename_file) {
 
 
    x <- list.files(path)
    z <- NULL
 
-   for(i in x) {
+   for(i in x) {                             # for each RTK source file,
       f <- read.csv(file.path(path, i))
       if(is.null(f$Tilt.angle))
          f <- cbind(f, Tilt.angle = NA)
@@ -30,9 +32,12 @@ gather_rtk <- function(path = 'C:/Work/saltmarsh/data/uas2026/field/RTK',
          z <- rbind(z, f)
    }
 
+   z <- rename_cols(z, rename_file)          # rename columns and drop junk
+
+
    y <- reproj_rtk(z)      # reproject and validate RTK points
 
-   q <- st_as_sf(y, coords = c('Easting', 'Northing', 'Elevation'), crs = 'EPSG:6491+5703')
+   q <- st_as_sf(y, coords = c('easting', 'northing', 'elevation'), crs = 'EPSG:6491+5703')
 
    if(!is.null(result)) {
       st_write(q, result, append = FALSE)

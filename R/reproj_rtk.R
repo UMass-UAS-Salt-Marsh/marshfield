@@ -16,8 +16,8 @@ PIPE_2018 <- paste0(
 #' Reproject RTK points from Emlid to EPSG:6491+5703
 #'
 #' NAD83(2011) / Massachusetts Mainland + NAVD88(GEOID18) height.
-#' Works from Longitude/Latitude/Ellipsoidal.height, which Emlid writes in the
-#' project datum regardless of the configured projection, so every CS.name
+#' Works from longitude/latitude/ellipsoidal_height, which Emlid writes in the
+#' project datum regardless of the configured projection, so every CS_name
 #' variant (including plots collected with no vertical datum set) is handled
 #' by one transform.
 #'
@@ -27,7 +27,7 @@ PIPE_2018 <- paste0(
 #' @param tol_mm Max allowed disagreement with Emlid on correctly-configured plots
 #' @param validate Require correctly-configured plots to check against
 #' @returns x with old_easting/old_northing/old_elevation/old_cs_name retained
-#'   and Easting/Northing/Elevation/CS.name replaced. Provenance in attr(., 'reproj').
+#'   and easting/northing/elevation/CS_name replaced. Provenance in attr(., 'reproj').
 #' @importFrom sf sf_proj_network sf_proj_pipelines sf_project st_crs st_as_sf st_transform st_coordinates sf_extSoftVersion
 #' @importFrom utils packageVersion
 #' @export
@@ -43,17 +43,17 @@ reproj_rtk <- function(x, pipeline = PIPE_2018, tol_mm = 2, validate = TRUE) {
 
 
    ## ---- input checks ----------------------------------------------------
-   need <- c('CS.name', 'Longitude', 'Latitude', 'Ellipsoidal.height',
-             'Easting', 'Northing', 'Elevation')
+   need <- c('CS_name', 'longitude', 'latitude', 'ellipsoidal_height',
+             'easting', 'northing', 'elevation')
    miss <- setdiff(need, names(x))
    if (length(miss))
       stop('Missing column(s): ', paste(miss, collapse = ', '))
 
-   if (anyNA(x$Longitude) | anyNA(x$Latitude) | anyNA(x$Ellipsoidal.height))
-      stop('NA in Longitude, Latitude, or Ellipsoidal.height')
+   if (anyNA(x$longitude) | anyNA(x$latitude) | anyNA(x$ellipsoidal_height))
+      stop('NA in longitude, latitude, or ellipsoidal_height')
 
-   if (any(x$Latitude < 41 | x$Latitude > 43) |
-       any(x$Longitude < -74 | x$Longitude > -69))
+   if (any(x$latitude < 41 | x$latitude > 43) |
+       any(x$longitude < -74 | x$longitude > -69))
       stop('Coordinates fall outside Massachusetts - swapped lat/long, or wrong datum?')
 
    nm <- st_crs(target_h)$Name
@@ -91,7 +91,7 @@ reproj_rtk <- function(x, pipeline = PIPE_2018, tol_mm = 2, validate = TRUE) {
    ## ways and keep whichever matches the ordinary CRS-pair transform.
    ## The wrong order lands in the Southern Ocean, off the geoid grid, and
    ## returns non-finite - so the two are never ambiguous.
-   probe <- cbind(mean(x$Longitude), mean(x$Latitude), mean(x$Ellipsoidal.height))
+   probe <- cbind(mean(x$longitude), mean(x$latitude), mean(x$ellipsoidal_height))
    ref   <- sf_project(src_3d, target, probe, keep = TRUE)
 
    run <- function(xyz, swap) {
@@ -113,47 +113,47 @@ reproj_rtk <- function(x, pipeline = PIPE_2018, tol_mm = 2, validate = TRUE) {
 
 
    ## ---- transform -------------------------------------------------------
-   out <- run(cbind(x$Longitude, x$Latitude, x$Ellipsoidal.height), swap)
+   out <- run(cbind(x$longitude, x$latitude, x$ellipsoidal_height), swap)
    if (!all(is.finite(out)))
       stop(sum(!is.finite(out[, 1])), ' plot(s) returned non-finite coordinates - ',
            'geoid grid missing or points off-grid')
 
 
    ## ---- validate against correctly-configured plots ---------------------
-   good <- !is.na(x$CS.name) & x$CS.name == good_cs
+   good <- !is.na(x$CS_name) & x$CS_name == good_cs
    dh <- dv <- NA_real_
 
    if (any(good)) {
-      dh <- max(abs(out[good, 1] - x$Easting[good]),
-                abs(out[good, 2] - x$Northing[good])) * 1000
+      dh <- max(abs(out[good, 1] - x$easting[good]),
+                abs(out[good, 2] - x$northing[good])) * 1000
       if (dh > tol_mm)
          stop('Horizontal disagreement with Emlid on good plots: ', round(dh, 1), ' mm')
 
-      v <- good & !is.na(x$Elevation)
+      v <- good & !is.na(x$elevation)
       if (any(v)) {
-         dv <- max(abs(out[v, 3] - x$Elevation[v])) * 1000
+         dv <- max(abs(out[v, 3] - x$elevation[v])) * 1000
          if (dv > tol_mm)
             stop('Vertical disagreement with Emlid on good plots: ', round(dv, 1),
                  ' mm - wrong geoid grid?')
       } else if (validate) {
-         stop('No correctly-configured plots carry an Elevation to validate against')
+         stop('No correctly-configured plots carry an elevation to validate against')
       }
    } else if (validate) {
-      stop('No plots with CS.name "', good_cs, '" to validate against; ',
+      stop('No plots with CS_name "', good_cs, '" to validate against; ',
            'set validate = FALSE to override')
    }
 
 
    ## ---- replace ---------------------------------------------------------
-   x$old_easting   <- x$Easting
-   x$old_northing  <- x$Northing
-   x$old_elevation <- x$Elevation
-   x$old_cs_name   <- x$CS.name
+   x$old_easting   <- x$easting
+   x$old_northing  <- x$northing
+   x$old_elevation <- x$elevation
+   x$old_cs_name   <- x$CS_name
 
-   x$Easting   <- out[, 1]
-   x$Northing  <- out[, 2]
-   x$Elevation <- out[, 3]
-   x$CS.name   <- good_cs
+   x$easting   <- out[, 1]
+   x$northing  <- out[, 2]
+   x$elevation <- out[, 3]
+   x$CS_name   <- good_cs
 
    attr(x, 'reproj') <- list(
       date = Sys.Date(), pipeline = pipeline, axis_swap = swap,

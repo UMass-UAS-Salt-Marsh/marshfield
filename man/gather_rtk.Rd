@@ -6,13 +6,16 @@
 \usage{
 gather_rtk(
   path = "C:/Work/saltmarsh/data/uas2026/field/RTK",
-  result = "C:/Work/saltmarsh/data/uas2026/field/prelim/rtk.gpkg"
+  result = "C:/Work/saltmarsh/data/uas2026/field/prelim/rtk.gpkg",
+  rename_file
 )
 }
 \arguments{
 \item{path}{Path to folder of RTK files (.CSVs with nothing else in folder)}
 
 \item{result}{Path and filename of preliminary result file; use NULL to skip writing it}
+
+\item{rename_file}{Path and filename to specify column renaming and dropping}
 }
 \value{
 Data frame of RTK points with all info

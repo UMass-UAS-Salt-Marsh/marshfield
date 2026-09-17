@@ -14,7 +14,7 @@
 
 
 clean_rtkids <- function(x) {
-
+xxx <<- x
 
    y <- strsplit(toupper(x), '-')
    l <- sapply(y, length)

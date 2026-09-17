@@ -10,6 +10,7 @@
 #' @param plots Plots data frame
 #' @param rtk RTK data frame
 #' @returns A data frame with lots of confusing info
+#' @importFrom lubridate as.duration
 #' @export
 
 
@@ -39,7 +40,6 @@ flag_rtk <- function(plots, rtk, path) {
    b <- abs(d$delta_lag_1) > 25                                                     # ignore deltas > 10 min
    d$delta_lag_1[b] <- NA
    hist(d$delta_lag_1, nclass = 25)
-   plot(d$delta, d$delta_lag_1, pch = 19)
 
    d$time_lag_better <- abs(d$delta_lag_1) < abs(d$delta)
 
@@ -62,7 +62,6 @@ flag_rtk <- function(plots, rtk, path) {
    d$dist_lag_1[d$dist_lag_1 > 30] <- NA
    hist(d$dist_lag_1, nclass = 25)
    summary(d$dist_lag_1)
-   plot(d$dist, d$dist_lag_1, pch = 19)
 
    d$dist_lag_better <- abs(d$dist_lag_1) < abs(d$dist)
 

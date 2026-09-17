@@ -18,12 +18,12 @@ to let PROJ choose (and report what it chose).}
 }
 \value{
 x with old_easting/old_northing/old_elevation/old_cs_name retained
-and Easting/Northing/Elevation/CS.name replaced. Provenance in attr(., 'reproj').
+and easting/northing/elevation/CS_name replaced. Provenance in attr(., 'reproj').
 }
 \description{
 NAD83(2011) / Massachusetts Mainland + NAVD88(GEOID18) height.
-Works from Longitude/Latitude/Ellipsoidal.height, which Emlid writes in the
-project datum regardless of the configured projection, so every CS.name
+Works from longitude/latitude/ellipsoidal_height, which Emlid writes in the
+project datum regardless of the configured projection, so every CS_name
 variant (including plots collected with no vertical datum set) is handled
 by one transform.
 }
