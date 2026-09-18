@@ -74,7 +74,6 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    plots$plot_id[bad & fixable] <- paste(sapply(x, '[[', 1), sapply(x, '[[', 2), sprintf('%03d', plotno[bad & fixable]), sep = '-')
 
 
-
    err <- FALSE                                                            # --- find and report errors ---
 
    # clean plot ids
@@ -90,7 +89,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
    # clean RTK ids
    plots$rtk_id <- clean_rtkids(plots$rtk_id)                              # clean up formatting of RTK ids in plots
-   rtk$Name <- clean_rtkids(rtk$rtk_id)                                    # clean up formatting of RTK ids in RTK data
+   rtk$rtk_id <- clean_rtkids(rtk$rtk_id)                                    # clean up formatting of RTK ids in RTK data
 
    v <- valid_rtkids(plots$rtk_id)                                         # valid RTK ids in plots data
    if(any(!v)) {
@@ -100,7 +99,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
       err <- TRUE
    }
 
-   v2 <- valid_rtkids(rtk$Name)                                            # valid RTK ids in RTK data
+   v2 <- valid_rtkids(rtk$rtk_id)                                            # valid RTK ids in RTK data
    if(any(!v2)) {
       cat('\nBad RTK ids in RTK data:\n')
       print(data.frame(row = 1:nrow(rtk), rtk_id = rtk$rtk_id)[!v2,], quote = FALSE, row.names = FALSE)
@@ -109,11 +108,11 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    }
 
 
-   d <- duplicated(rtk$Name)                                               # dups ids in RTK data
+   d <- duplicated(rtk$rtk_id)                                               # dups ids in RTK data
    if(any(d)) {
       cat('\nDuplicated RTK ids in RTK data:\n')
-      d <- rtk$Name %in% rtk$Name[d]
-      print(data.frame(row = 1:nrow(rtk), Name = rtk$rtk_id, old_rtk_id = rtk$old_rtk_id)[d,], quote = FALSE, row.names = FALSE)
+      d <- rtk$rtk_id %in% rtk$rtk_id[d]
+      print(data.frame(row = 1:nrow(rtk), rtk_id = rtk$rtk_id, old_rtk_id = rtk$old_rtk_id)[d,], quote = FALSE, row.names = FALSE)
       rtk$rtkid_dup[d] <- TRUE
       err <- TRUE
    }
@@ -135,13 +134,12 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
    d <- duplicated(plots$rtk_id)
    if(any(d)) {
-      cat('\n', sum(d), ' duplicated RTK ids in plot data:\n')
+      cat('\n', sum(d), ' duplicated RTK ids in plot data:\n', sep = '')
       d <- plots$rtk_id %in% plots$rtk_id[d]
       print(data.frame(row = 1:nrow(plots), rtk_id = plots$rtk_id, old_rtk_id = plots$old_rtk_id, notes = plots$notes)[d,], quote = FALSE, row.names = FALSE)
       rtk$rtkid_dup[d] <- TRUE
       err <- TRUE
    }
-
 
 
    # clean up plots table some more
@@ -193,8 +191,6 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
       with_tz('America/New_York')                                # RTK points are labeled as UTC, but are really EDT
 
 
-
-
    rtk_names <- c('rtk_id', 'easting', 'northing', 'elevation', 'longitude', 'latitude', 'ellipsoidal_height', 'lateral_rms', 'elevation_rms', 'date', 'PDOP')
    plots <- merge(plots, rtk[, rtk_names], by = 'rtk_id', all.y = FALSE)
 
@@ -202,9 +198,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
    # correct section numbers
-##   fix_sections <- read.table(file.path(path, 'pars/fix_sections.txt'), sep = '\t', header = TRUE)                       # <<<<<<<<<<<<<---------- in progress
-
-
+   ##   fix_sections <- read.table(file.path(path, 'pars/fix_sections.txt'), sep = '\t', header = TRUE)                       # <<<<<<<<<<<<<---------- in progress
 
 
    # drop bad plots and correct bad RTKs from parameter files
@@ -243,6 +237,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
 
+
    ##  rtk_errors <<- flag_rtk(plots, rtk, path)             # ...................... try to find RTK errors .....................
 
 
@@ -251,11 +246,16 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    # split plots (primary data) and aux (corresponding, with extra info)
 
 
-   primary <- c('plot_id', 'date', 'subclass', 'rtk_id', 'easting', 'northing', 'elevation', 'observers', 'notes', 'has_photo', 'plotid_err', 'rtkid_err')
+   primary <- c('plot_id', 'date', 'subclass', 'rtk_id', 'easting', 'northing', 'elevation', 'section', 'observers', 'notes', 'has_photo', 'plotid_err', 'rtkid_err')
    aux <- plots[, c('plot_id', names(plots)[!names(plots) %in% primary])]
    everything <- plots
    plots <- plots[, primary]
 
+
+   # Results:
+   #   plots - primary fields without clutter
+   #   aux - everything else
+   #   everything - all fields
 
    plots <<- plots                                                                                    # save data frames as globals
    everything <<- everything
@@ -272,18 +272,21 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    pathP <- file.path(path, 'prelim')                                                                 # preliminary results path
 
    q <- st_as_sf(everything, coords = c('easting', 'northing', 'elevation'), crs = 'EPSG:6491+5703')  # 3d GeoPackage of everything
-   st_write(q, paste0(pathP, 'plots.gpkg'), append = FALSE)
+   st_write(q, file.path(pathP, 'everything.gpkg'), append = FALSE)
+
+   q <- st_as_sf(plots, coords = c('easting', 'northing', 'elevation'), crs = 'EPSG:6491+5703')       # 3d GeoPackage of just primary fields
+   st_write(q, file.path(pathP, 'plots.gpkg'), append = FALSE)
 
 
    everything$date <- as.character(everything$date)                                                   # so shapefile writing doesn't have conniptions
    everything$tablet_date <- as.character(everything$tablet_date)
    everything$photo_date <- as.character(everything$photo_date)
    q <- st_as_sf(everything, coords = c('easting', 'northing'), crs = 'EPSG:6491')                    # 2d shapefile of everything
-   st_write(q, paste0(pathP, 'plots.shp'), append = FALSE)
+   suppressWarnings(st_write(q, file.path(pathP, 'everything.shp'), append = FALSE))
 
    plots$date <- as.character(plots$date)
    q <- st_as_sf(plots, coords = c('easting', 'northing'), crs = 'EPSG:6491')                         # 2d shapefile of plots (just the good stuff)
-   st_write(q, paste0(pathP, 'primary.shp'), append = FALSE)
+   suppressWarnings(st_write(q, file.path(pathP, 'plots.shp'), append = FALSE))
 
 
    # write preliminary tables
@@ -293,7 +296,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
    message('Preliminary tables and shapefiles written to ', pathP)
 
-
+   message(nrow(plots), ' plots in final dataset')
 
 
 

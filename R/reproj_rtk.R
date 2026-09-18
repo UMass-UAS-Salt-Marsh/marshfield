@@ -169,7 +169,7 @@ reproj_rtk <- function(x, pipeline = PIPE_2018, tol_mm = 2, validate = TRUE) {
    cat('sf', as.character(packageVersion('sf')),
        '| PROJ', unname(sf_extSoftVersion()['PROJ']),
        '| axis swap', swap, '\n')
-   cat('\nMax disagreement with Emlid on', sum(good), 'good plots:\n')
+   cat('\nMax disagreement from projection with Emlid on', sum(good), 'good plots:\n')
    cat('  horizontal', round(dh, 2), 'mm\n')
    cat('  vertical  ', round(dv, 2), 'mm\n')
 
