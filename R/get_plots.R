@@ -246,7 +246,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    # split plots (primary data) and aux (corresponding, with extra info)
 
 
-   primary <- c('plot_id', 'date', 'subclass', 'rtk_id', 'easting', 'northing', 'elevation', 'section', 'observers', 'notes', 'has_photo', 'plotid_err', 'rtkid_err')
+   primary <- c('plot_id', 'date', 'subclass', 'rtk_id', 'easting', 'northing', 'elevation', 'lateral_rms', 'section', 'observers', 'notes', 'has_photo', 'plotid_err', 'rtkid_err')
    aux <- plots[, c('plot_id', names(plots)[!names(plots) %in% primary])]
    everything <- plots
    plots <- plots[, primary]
@@ -292,7 +292,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    # write preliminary tables
    tables <- c('plots', 'dropped', 'rtk', 'pct_cover', 'sessions', 'primary', 'aux')
    for(f in tables)
-      write.table(f, file.path(pathP, paste0(f, '.txt')), sep = '\t', row.names = FALSE, quote = FALSE)
+      write.table(eval(parse(text = f)), file.path(pathP, paste0(f, '.txt')), sep = '\t', row.names = FALSE, quote = FALSE)
 
    message('Preliminary tables and shapefiles written to ', pathP)
 
