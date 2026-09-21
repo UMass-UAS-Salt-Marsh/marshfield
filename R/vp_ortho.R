@@ -49,6 +49,8 @@ vp_load_ortho <- function(file, type) {
 #' @param file Result PNG file
 #' @param px Size of PNG in pixels
 #' @param radius Plot radius (m)
+#' @param offset Recorded offset c(dx, dy) of actual plot center, or NULL; drawn as a cyan
+#'   cross and dashed circle at the actual location, with a line from the plot center
 #' @importFrom terra ext crop xmin xmax ymin ymax res
 #' @importFrom grDevices png dev.off
 #' @importFrom graphics par plot.new plot.window rasterImage lines points segments text
@@ -56,7 +58,7 @@ vp_load_ortho <- function(file, type) {
 #' @noRd
 
 
-vp_render_ortho <- function(o, x, y, width, file, px = 800, radius = 0.7) {
+vp_render_ortho <- function(o, x, y, width, file, px = 800, radius = 0.7, offset = NULL) {
 
    png(file, width = px, height = px)
    on.exit(dev.off())
@@ -86,6 +88,14 @@ vp_render_ortho <- function(o, x, y, width, file, px = 800, radius = 0.7) {
    th <- seq(0, 2 * pi, length.out = 361)                                        # plot perimeter and center
    lines(x + radius * cos(th), y + radius * sin(th), col = 'white', lwd = 5)
    points(x, y, pch = 21, bg = '#FF7F00', col = 'black', cex = 1.8)
+
+   if(!is.null(offset)) {                                                        # recorded offset: actual plot location
+      ax <- x + offset[1]
+      ay <- y + offset[2]
+      lines(ax + radius * cos(th), ay + radius * sin(th), col = '#00E5FF', lwd = 2, lty = 2)
+      segments(x, y, ax, ay, col = '#00E5FF', lwd = 2)
+      points(ax, ay, pch = 3, col = '#00E5FF', cex = 2.5, lwd = 3)
+   }
 
    sb <- if(width <= 2) 0.5 else if(width <= 5) 1 else 2                         # scale bar
    sx <- xlim[1] + width * 0.04

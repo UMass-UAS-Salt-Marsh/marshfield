@@ -6,13 +6,16 @@
 \usage{
 view_plots(
   path = "C:/Work/saltmarsh/data/uas2026/field",
-  ortho_path = "C:/Work/saltmarsh/data/uas2026/orthos"
+  ortho_path = "C:/Work/saltmarsh/data/uas2026/orthos",
+  classes = "C:/Work/saltmarsh/pars/classes.txt"
 )
 }
 \arguments{
 \item{path}{Path to field data}
 
 \item{ortho_path}{Path to orthoimages and DEMs}
+
+\item{classes}{Path to classes table, used for subclass names}
 }
 \description{
 Steps through field plots, displaying the field photo for each plot on the left and a clip
@@ -27,11 +30,15 @@ Plot data come from \code{prelim/plots.gpkg} and \code{prelim/pct_cover.txt}, ph
 \verb{photos/plots/<plot_id>.jpg}, and the list of orthos for each site from \code{pars/orthos.txt}.
 \code{orthos.txt} is a tab-delimited table with columns \code{site}, \code{name} (displayed in the image
 selector), \code{type} (\code{rgb} for orthophotos or \code{dem} for DEMs, which are displayed as shaded
-relief), and \code{file} (relative to \code{ortho_path}, or a full path). If \code{plots} doesn't have a
+relief), \code{file} (relative to \code{ortho_path}, or a full path), and optionally \code{vdatum} for DEMs
+(\code{navd88}, the default, or \code{ellipsoidal}, in which case RTK ellipsoidal heights are read
+from \code{prelim/everything.gpkg}). DEM - RTK height at plot center is displayed below the ortho
+for each DEM at the site. If \code{plots} doesn't have a
 \code{site} column, all plots are assigned to the first site in \code{orthos.txt}.
 
-Plot coordinates are used as-is on orthos, with no reprojection. \strong{Note that orthos may
-be in a different CRS (or NAD83 realization) than the plots.}
+\strong{TEMPORARY:} plot centers are reprojected on the fly into each ortho's CRS (see
+\code{vp_temp_reproject}), because the July 2026 orthos are in NAD83(1986) rather than
+NAD83(2011). Remove this once orthos are delivered in EPSG:6491.
 
 \code{view_plots} includes the following controls:
 \itemize{
@@ -44,8 +51,11 @@ character, and a trailing \code{*} is implied. Plot ids are
 pink tablet plots on July 21 in section 1, and \verb{*-03-} all plots in section 3.
 \item \strong{Keyword filter} one or more words, all of which must match. Precede a word with \code{!} to
 negate it. Reserved words are \code{reviewed}, \code{problems}, \code{rejected}, \code{comments} (has
-comments), \code{keywords} (has any keywords), \code{photo} (has a photo), and \code{rotated} (photo has
-been rotated). Any other word matches plots with that word in their review keywords. For
+comments), \code{keywords} (has any keywords), \code{photo} (has a photo), \code{rotated} (photo has
+been rotated), and \code{offset} (has an ortho offset recorded). \code{subclass=6} selects
+subclass 6, and \code{subclass=6|7} subclass 6 or 7 (no spaces around \code{=}). \code{dz>0.8},
+\code{dz<-0.5}, and \verb{|dz|>0.8} select plots by DEM - RTK height, in m (using the selected image
+if it's a DEM, otherwise the site's first DEM). Large differences can flag RTK errors. Any other word matches plots with that word in their review keywords. For
 example, \code{!reviewed} shows plots that haven't been reviewed, and \verb{problems macroalgae}
 shows plots flagged with problems that have the keyword macroalgae. Changes to reviews
 don't hide the current plot until the filter is changed.
@@ -64,6 +74,13 @@ back to navigating with arrow keys. \strong{Clear} resets rotation and center.
 \item \strong{Image} selects the ortho or DEM to display for this site.
 \item \strong{Zoom} sets the width of the ortho clip. The white circle is the plot perimeter (0.7 m
 radius) and the orange dot is plot center.
+\item \strong{Offset} to measure how far off a plot is on the ortho, double-click where the plot
+center actually appears on the ortho image (the 2 m zoom gives the most precise
+placement). The offset from the drawn plot center (\code{dx}, \code{dy}, in m east and north) is
+recorded in \code{pars/offsets.txt} for this plot and ortho, and the actual location is drawn
+as a cyan cross and dashed circle. Double-click again to move it; \strong{Clear offset} removes
+it. Use \code{offset_summary} to summarize offsets (systematic vs. random vs. trending across
+the site).
 \item \strong{Exit} exits the app (reviews are already saved).
 }
 

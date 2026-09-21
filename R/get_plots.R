@@ -191,10 +191,9 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
       with_tz('America/New_York')                                # RTK points are labeled as UTC, but are really EDT
 
 
-   rtk_names <- c('rtk_id', 'easting', 'northing', 'elevation', 'longitude', 'latitude', 'ellipsoidal_height', 'lateral_rms', 'elevation_rms', 'date', 'PDOP')
+   rtk_names <- c('rtk_id', 'easting', 'northing', 'elevation', 'longitude', 'latitude', 'ellipsoidal_height', 'lateral_rms', 'elevation_rms', 'date', 'PDOP', 'tilt')
    plots <- merge(plots, rtk[, rtk_names], by = 'rtk_id', all.y = FALSE)
 
-   plots <- sort_plots(plots, path)                            # sort plots by date, tablet, section, and plot number
 
 
    # correct section numbers
@@ -236,6 +235,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    }
 
 
+   plots <- sort_plots(plots, path)                            # sort plots by date, tablet, section, and plot number
 
 
    ##  rtk_errors <<- flag_rtk(plots, rtk, path)             # ...................... try to find RTK errors .....................
@@ -290,7 +290,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
    # write preliminary tables
-   tables <- c('plots', 'dropped', 'rtk', 'pct_cover', 'sessions', 'primary', 'aux')
+   tables <- c('plots', 'everything', 'dropped', 'rtk', 'pct_cover', 'sessions', 'aux')
    for(f in tables)
       write.table(eval(parse(text = f)), file.path(pathP, paste0(f, '.txt')), sep = '\t', row.names = FALSE, quote = FALSE)
 

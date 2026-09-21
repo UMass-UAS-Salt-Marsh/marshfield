@@ -50,7 +50,8 @@ vp_info <- function(p, cover) {
       if(isTRUE(p$plotid_err) | isTRUE(p$rtkid_err))
          tags$div(class = 'vp-error', paste(c('Bad plot id', 'Bad RTK id')[c(isTRUE(p$plotid_err), isTRUE(p$rtkid_err))],
                                             collapse = '; ')),
-      tags$div(class = 'vp-subclass', paste('Subclass', p$subclass)),
+      tags$div(class = 'vp-subclass', paste0('Subclass ', p$subclass,
+                                                 if(!is.na(p$subclass_name) && p$subclass_name != '') paste0(' (', p$subclass_name, ')'))),
       tags$h6('Percent cover'),
       if(nrow(cover) == 0)
          tags$div(class = 'vp-note', 'No percent cover recorded'),
