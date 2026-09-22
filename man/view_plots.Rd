@@ -55,7 +55,8 @@ comments), \code{keywords} (has any keywords), \code{photo} (has a photo), \code
 been rotated), and \code{offset} (has an ortho offset recorded). \code{subclass=6} selects
 subclass 6, and \code{subclass=6|7} subclass 6 or 7 (no spaces around \code{=}). \code{dz>0.8},
 \code{dz<-0.5}, and \verb{|dz|>0.8} select plots by DEM - RTK height, in m (using the selected image
-if it's a DEM, otherwise the site's first DEM). Large differences can flag RTK errors. Any other word matches plots with that word in their review keywords. For
+if it's a DEM, otherwise the site's first DEM). Large differences can flag RTK errors.
+Any other word matches plots with that word in their review keywords. For
 example, \code{!reviewed} shows plots that haven't been reviewed, and \verb{problems macroalgae}
 shows plots flagged with problems that have the keyword macroalgae. Changes to reviews
 don't hide the current plot until the filter is changed.

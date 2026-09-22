@@ -4,6 +4,19 @@
 #'
 #' Note some ugly hard-coded fixes: test data are dropped, and a missing date is added.
 #'
+#' Several parameter files (tab-delimited text) are in pars/. They include
+#'
+#' - `rtk_names.txt` Fields to drop (use `-`) or rename in RTK: `old`, `new`
+#' - `sessions_names.txt` Fields to drop (use `-`) or rename in sessions: `old`, `new`
+#' - `plots_names.txt` Fields to drop (use `-`) or rename in plots: `old`, `new`
+#' - `fix_sections.txt` Split field days into sections: `day`, `tablet`, `as_section`, `is_section`
+#' - `observers.txt` List of observers initials and names: `initials`, `name`
+#' - `field_days.txt` Day abbreviations (J21, J22, ..., A07) in order, for sorting data: `day`
+#' - `species.txt` Change genera incorrectly listed as species by app in percent cover
+#' - `fix_rtk.txt` RTK ids to reassign (usually thanks to off-by-one errors): `plot_id`,
+#'    `new_rtk_id`, `fix_rtk_confirmed`, `fix_rtk_reason`
+#' - `drop_plots.txt` Plots to drop: `plot_id`, `drop_confirmed`, and `drop_reason`
+#'
 #' @param path Path to source data
 #' @param plot_file Name of plots file from Salt Marsh Data
 #' @param session_file Name of sessions file from Salt Marsh data
@@ -68,10 +81,12 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    # fix missing plot ids when plot ids were in site_name
    plotno <- suppressWarnings(as.numeric(plots$plot_id))
    bad <- !is.na(plotno)                                                   # plot ids that weren't set, and thus were assigned 1, 2, 3, ...
-   fixable <- valid_plotids(plots$site)
+   fixable <- valid_plotids(plots$site)                                    # some plot ids ended up in site, which is otherwise variable and useless
    x <- strsplit(plots$site_name[bad & fixable], '-')
    plots$old_plot_id <- plots$plot_id
    plots$plot_id[bad & fixable] <- paste(sapply(x, '[[', 1), sapply(x, '[[', 2), sprintf('%03d', plotno[bad & fixable]), sep = '-')
+
+   plots$site <- 'ESX'                                                     # all plots are for site ESX
 
 
    err <- FALSE                                                            # --- find and report errors ---
@@ -200,6 +215,13 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    ##   fix_sections <- read.table(file.path(path, 'pars/fix_sections.txt'), sep = '\t', header = TRUE)                       # <<<<<<<<<<<<<---------- in progress
 
 
+
+   sp <- read.table(file.path(path, 'pars/species.txt'), sep = '\t', header = TRUE)                # fix incorrect species names in data file (bogus specific for genera)
+   b <- match(pct_cover$species, sp$old)
+   pct_cover$species[!is.na(b)] <- sp$new[b[!is.na(b)]]
+
+
+
    # drop bad plots and correct bad RTKs from parameter files
    # dropped gets dropped plots, with drop_confirmd and drop_reason
    # plots gets all plots that were not dropped
@@ -246,7 +268,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    # split plots (primary data) and aux (corresponding, with extra info)
 
 
-   primary <- c('plot_id', 'date', 'subclass', 'rtk_id', 'easting', 'northing', 'elevation', 'lateral_rms', 'section', 'observers', 'notes', 'has_photo', 'plotid_err', 'rtkid_err')
+   primary <- c('plot_id', 'date', 'subclass', 'site', 'rtk_id', 'easting', 'northing', 'elevation', 'lateral_rms', 'section', 'observers', 'notes', 'has_photo', 'plotid_err', 'rtkid_err')
    aux <- plots[, c('plot_id', names(plots)[!names(plots) %in% primary])]
    everything <- plots
    plots <- plots[, primary]

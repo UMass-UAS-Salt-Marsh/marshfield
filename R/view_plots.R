@@ -36,7 +36,8 @@
 #'   been rotated), and `offset` (has an ortho offset recorded). `subclass=6` selects
 #'   subclass 6, and `subclass=6|7` subclass 6 or 7 (no spaces around `=`). `dz>0.8`,
 #'   `dz<-0.5`, and `|dz|>0.8` select plots by DEM - RTK height, in m (using the selected image
-#'   if it's a DEM, otherwise the site's first DEM). Large differences can flag RTK errors. Any other word matches plots with that word in their review keywords. For
+#'   if it's a DEM, otherwise the site's first DEM). Large differences can flag RTK errors.
+#'   Any other word matches plots with that word in their review keywords. For
 #'   example, `!reviewed` shows plots that haven't been reviewed, and `problems macroalgae`
 #'   shows plots flagged with problems that have the keyword macroalgae. Changes to reviews
 #'   don't hide the current plot until the filter is changed.
