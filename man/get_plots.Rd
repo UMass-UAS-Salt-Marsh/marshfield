@@ -44,7 +44,7 @@ Several parameter files (tab-delimited text) are in pars/. They include
 \item \code{rtk_names.txt} Fields to drop (use \code{-}) or rename in RTK: \code{old}, \code{new}
 \item \code{sessions_names.txt} Fields to drop (use \code{-}) or rename in sessions: \code{old}, \code{new}
 \item \code{plots_names.txt} Fields to drop (use \code{-}) or rename in plots: \code{old}, \code{new}
-\item \code{fix_sections.txt} Split field days into sections: \code{day}, \code{tablet}, \code{as_section}, \code{is_section}
+\item \code{fix_sections.txt} Split field days into sections: \code{start}, \code{end}, \code{is_section}, \code{reason}
 \item \code{observers.txt} List of observers initials and names: \code{initials}, \code{name}
 \item \code{field_days.txt} Day abbreviations (J21, J22, ..., A07) in order, for sorting data: \code{day}
 \item \code{species.txt} Change genera incorrectly listed as species by app in percent cover

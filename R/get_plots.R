@@ -9,7 +9,7 @@
 #' - `rtk_names.txt` Fields to drop (use `-`) or rename in RTK: `old`, `new`
 #' - `sessions_names.txt` Fields to drop (use `-`) or rename in sessions: `old`, `new`
 #' - `plots_names.txt` Fields to drop (use `-`) or rename in plots: `old`, `new`
-#' - `fix_sections.txt` Split field days into sections: `day`, `tablet`, `as_section`, `is_section`
+#' - `fix_sections.txt` Split field days into sections: `start`, `end`, `is_section`, `reason`
 #' - `observers.txt` List of observers initials and names: `initials`, `name`
 #' - `field_days.txt` Day abbreviations (J21, J22, ..., A07) in order, for sorting data: `day`
 #' - `species.txt` Change genera incorrectly listed as species by app in percent cover
@@ -210,15 +210,23 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    plots <- merge(plots, rtk[, rtk_names], by = 'rtk_id', all.y = FALSE)
 
 
-
    # correct section numbers
-   ##   fix_sections <- read.table(file.path(path, 'pars/fix_sections.txt'), sep = '\t', header = TRUE)                       # <<<<<<<<<<<<<---------- in progress
+   plots <- fix_sections(plots, path)
+
+
+   # correct observers
+   fix_obs <- read.table(file.path(path, 'pars/fix_observers.txt'), sep = '\t', header = TRUE)
+   b <- match(plots$observers, fix_obs$old)
+   plots$observers[!is.na(b)] <- fix_obs$new[b[!is.na(b)]]
 
 
 
-   sp <- read.table(file.path(path, 'pars/species.txt'), sep = '\t', header = TRUE)                # fix incorrect species names in data file (bogus specific for genera)
+   # fix incorrect species names in data file (bogus specific for genera)
+   sp <- read.table(file.path(path, 'pars/species.txt'), sep = '\t', header = TRUE)
    b <- match(pct_cover$species, sp$old)
    pct_cover$species[!is.na(b)] <- sp$new[b[!is.na(b)]]
+
+
 
 
 

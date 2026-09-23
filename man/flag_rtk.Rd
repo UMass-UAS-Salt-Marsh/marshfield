@@ -4,10 +4,10 @@
 \alias{flag_rtk}
 \title{Try to find RTK errors}
 \usage{
-flag_rtk(plots, rtk, path)
+flag_rtk(x, rtk, path)
 }
 \arguments{
-\item{plots}{Plots data frame}
+\item{x}{everything data frame}
 
 \item{rtk}{RTK data frame}
 }
