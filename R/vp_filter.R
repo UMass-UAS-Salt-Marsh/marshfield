@@ -7,8 +7,8 @@
 #'
 #' **Keyword filter**: one or more words (separated by spaces or commas); plots must match all
 #' of them. Precede a word with `!` to negate it. Reserved words are `reviewed`, `problems`,
-#' `rejected`, `comments` (has comments), `keywords` (has any keywords), `photo` (has a
-#' photo), `rotated` (photo has been rotated), and `offset` (has an ortho offset recorded for
+#' `rejected`, `comments` (has review comments), `keywords` (has any keywords), `photo` (plot has a
+#' photo), `notes` (plot has notes), `rotated` (photo has been rotated), and `offset` (has an ortho offset recorded for
 #' any ortho). `subclass=6` selects plots of subclass 6, and `subclass=6|7` plots of
 #' subclass 6 or 7 (no spaces). `dz>0.8`, `dz<-0.5`, and `|dz|>0.8` select plots by DEM - RTK
 #' height (in m). Any other word matches plots with that word in their review keywords.
@@ -60,6 +60,7 @@ vp_filter <- function(plots, review, site, pattern, keywords, has_offset = rep(F
                   comments = review$comments != '',
                   keywords = review$keywords != '',
                   photo = plots$photo,
+                  notes = plots$notes != '',
                   rotated = !is.na(review$rotation),
                   offset = has_offset,
                   sapply(kw, function(k) w %in% k))

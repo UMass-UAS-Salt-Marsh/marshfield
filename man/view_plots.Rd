@@ -50,16 +50,15 @@ character, and a trailing \code{*} is implied. Plot ids are
 \code{BA04} all blue tablet plots on August 4, \code{?A04} all plots on August 4, \code{PJ21-01} all
 pink tablet plots on July 21 in section 1, and \verb{*-03-} all plots in section 3.
 \item \strong{Keyword filter} one or more words, all of which must match. Precede a word with \code{!} to
-negate it. Reserved words are \code{reviewed}, \code{problems}, \code{rejected}, \code{comments} (has
-comments), \code{keywords} (has any keywords), \code{photo} (has a photo), \code{rotated} (photo has
-been rotated), and \code{offset} (has an ortho offset recorded). \code{subclass=6} selects
-subclass 6, and \code{subclass=6|7} subclass 6 or 7 (no spaces around \code{=}). \code{dz>0.8},
-\code{dz<-0.5}, and \verb{|dz|>0.8} select plots by DEM - RTK height, in m (using the selected image
-if it's a DEM, otherwise the site's first DEM). Large differences can flag RTK errors.
-Any other word matches plots with that word in their review keywords. For
-example, \code{!reviewed} shows plots that haven't been reviewed, and \verb{problems macroalgae}
-shows plots flagged with problems that have the keyword macroalgae. Changes to reviews
-don't hide the current plot until the filter is changed.
+negate it. Reserved words are \code{reviewed}, \code{problems}, \code{rejected}, \code{comments} (has comments),
+\code{keywords} (has any keywords), \code{photo} (plot has a photo), \code{notes} (plot has notes), \code{rotated}
+(photo has #'   been rotated), and \code{offset} (has an ortho offset recorded). \code{subclass=6} selects
+subclass 6, and \code{subclass=6|7} subclass 6 or 7 (no spaces around \code{=}). \code{dz>0.8}, \code{dz<-0.5}, and
+\verb{|dz|>0.8} select plots by DEM - RTK height, in m (using the selected image if it's a DEM,
+otherwise the site's first DEM). Large differences can flag RTK errors. Any other word matches
+plots with that word in their review keywords. For example, \code{!reviewed} shows plots that haven't
+been reviewed, and \verb{problems macroalgae} shows plots flagged with problems that have the keyword
+macroalgae. Changes to reviews don't hide the current plot until the filter is changed.
 \item \strong{Navigation buttons} jump to the first, previous, next, or last selected plot. You can
 also use the left and right arrow keys, Home, and End (when you're not typing in a text
 field).

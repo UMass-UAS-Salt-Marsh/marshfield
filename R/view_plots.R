@@ -31,16 +31,15 @@
 #'   `BA04` all blue tablet plots on August 4, `?A04` all plots on August 4, `PJ21-01` all
 #'   pink tablet plots on July 21 in section 1, and `*-03-` all plots in section 3.
 #' - **Keyword filter** one or more words, all of which must match. Precede a word with `!` to
-#'   negate it. Reserved words are `reviewed`, `problems`, `rejected`, `comments` (has
-#'   comments), `keywords` (has any keywords), `photo` (has a photo), `rotated` (photo has
-#'   been rotated), and `offset` (has an ortho offset recorded). `subclass=6` selects
-#'   subclass 6, and `subclass=6|7` subclass 6 or 7 (no spaces around `=`). `dz>0.8`,
-#'   `dz<-0.5`, and `|dz|>0.8` select plots by DEM - RTK height, in m (using the selected image
-#'   if it's a DEM, otherwise the site's first DEM). Large differences can flag RTK errors.
-#'   Any other word matches plots with that word in their review keywords. For
-#'   example, `!reviewed` shows plots that haven't been reviewed, and `problems macroalgae`
-#'   shows plots flagged with problems that have the keyword macroalgae. Changes to reviews
-#'   don't hide the current plot until the filter is changed.
+#'   negate it. Reserved words are `reviewed`, `problems`, `rejected`, `comments` (has comments),
+#'   `keywords` (has any keywords), `photo` (plot has a photo), `notes` (plot has notes), `rotated`
+#'   (photo has #'   been rotated), and `offset` (has an ortho offset recorded). `subclass=6` selects
+#'   subclass 6, and `subclass=6|7` subclass 6 or 7 (no spaces around `=`). `dz>0.8`, `dz<-0.5`, and
+#'   `|dz|>0.8` select plots by DEM - RTK height, in m (using the selected image if it's a DEM,
+#'   otherwise the site's first DEM). Large differences can flag RTK errors. Any other word matches
+#'   plots with that word in their review keywords. For example, `!reviewed` shows plots that haven't
+#'   been reviewed, and `problems macroalgae` shows plots flagged with problems that have the keyword
+#'   macroalgae. Changes to reviews don't hide the current plot until the filter is changed.
 #' - **Navigation buttons** jump to the first, previous, next, or last selected plot. You can
 #'   also use the left and right arrow keys, Home, and End (when you're not typing in a text
 #'   field).
