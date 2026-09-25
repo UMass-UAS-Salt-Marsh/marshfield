@@ -4,12 +4,10 @@
 \alias{flag_rtk}
 \title{Try to find RTK errors}
 \usage{
-flag_rtk(x, rtk, path)
+flag_rtk(x)
 }
 \arguments{
 \item{x}{everything data frame}
-
-\item{rtk}{RTK data frame}
 }
 \value{
 A data frame with lots of confusing info
@@ -22,4 +20,7 @@ until field crew notices and readjusts (or traces down the error and fixes it in
 \details{
 Note that a handful of RTKs were taken out of sequence, as in RTK failures and flagging on
 day 1.
+
+This function isn't very useful, as tablet GPS points are really noisy, and the time sequence
+isn't consistent. It may provide supporting evidence of bad RTKs.
 }

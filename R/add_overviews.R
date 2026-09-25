@@ -12,11 +12,7 @@
 #' @export
 
 
-add_overviews <- function(files = c('cst_2026_08_21_mid_micap_ortho.tif',
-                                    'cst_2026_08_07_mid_micap_ortho.tif',
-                                    'cst_2026_07_20_low_micap_ortho.tif'),
-                          path = 'K:/projects/uas_veg/sites/cst/ortho/',
-                          nodata = 65535) {
+add_overviews <- function(files, path = '', nodata = 65535) {
 
 
    write_nodata_aux <- function(f, nodata) {
@@ -26,8 +22,8 @@ add_overviews <- function(files = c('cst_2026_08_21_mid_micap_ortho.tif',
       writeLines(c("<PAMDataset>", bands, "</PAMDataset>"), paste0(f, ".aux.xml"))
    }
 
-
-   files <- file.path(path, files)
+   if(path != '')
+      files <- file.path(path, files)
 
    for(x in files) {
       message('Processing ', x, '...')

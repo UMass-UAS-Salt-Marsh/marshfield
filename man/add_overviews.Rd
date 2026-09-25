@@ -4,17 +4,12 @@
 \alias{add_overviews}
 \title{Add overviews and statistics to geoTIFFs}
 \usage{
-add_overviews(
-  path = "K:/projects/uas_veg/sites/cst/ortho/",
-  files = c("cst_2026_08_21_mid_micap_ortho.tif", "cst_2026_08_07_mid_micap_ortho.tif",
-    "cst_2026_07_20_low_micap_ortho.tif"),
-  nodata = 65535
-)
+add_overviews(files, path = "", nodata = 65535)
 }
 \arguments{
-\item{path}{Common path to files}
-
 \item{files}{Vector of geoTIFF file names}
+
+\item{path}{Common path to files}
 
 \item{nodata}{Value to use for nodata if it wasn't set on creation}
 }
