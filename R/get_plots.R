@@ -281,23 +281,23 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
 
-   # split plots (primary data) and aux (corresponding, with extra info)
+   # split plots (primary data) and auxil (corresponding, with extra info)
 
 
    primary <- c('plot_id', 'date', 'subclass', 'site', 'rtk_id', 'easting', 'northing', 'elevation', 'lateral_rms', 'section', 'observers', 'notes', 'has_photo', 'plotid_err', 'rtkid_err')
-   aux <- plots[, c('plot_id', names(plots)[!names(plots) %in% primary])]
+   auxil <- plots[, c('plot_id', names(plots)[!names(plots) %in% primary])]
    everything <- plots
    plots <- plots[, primary]
 
 
    # Results:
    #   plots - primary fields without clutter
-   #   aux - everything else
+   #   auxil - everything else
    #   everything - all fields
 
    plots <<- plots                                                                                    # save data frames as globals
    everything <<- everything
-   aux <<- aux
+   auxil <<- auxil
    dropped <<- dropped
    rtk <<- rtk
    pct_cover <<- pct_cover
@@ -328,7 +328,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
    # write preliminary tables
-   tables <- c('plots', 'everything', 'dropped', 'rtk', 'pct_cover', 'sessions', 'aux')
+   tables <- c('plots', 'everything', 'dropped', 'rtk', 'pct_cover', 'sessions', 'auxil')
    for(f in tables)
       write.table(eval(parse(text = f)), file.path(pathP, paste0(f, '.txt')), sep = '\t', row.names = FALSE, quote = FALSE)
 
