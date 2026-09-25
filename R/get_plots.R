@@ -30,7 +30,7 @@
 #' @importFrom dplyr distinct
 #' @importFrom stringi stri_extract_first_regex
 #' @importFrom exifr read_exif
-#' @importFrom lubridate ymd_hms with_tz
+#' @importFrom lubridate ymd_hms with_tz month day
 #' @importFrom sf st_crs<- st_transform st_as_sf st_coordinates
 #' @export
 
@@ -227,6 +227,14 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    pct_cover$species[!is.na(b)] <- sp$new[b[!is.na(b)]]
 
 
+   # look for bad dates in plot ids
+   pd <- data.frame(month = ifelse(substr(plots$plot_id, 2, 2) == 'J', 7, 8), day = suppressWarnings(as.numeric(substr(plots$plot_id, 3, 4))))
+   ad <- data.frame(month = month(plots$date), day = day(plots$date))
+   b <- apply(pd != ad, 1, 'any')
+   if(any(b)) {
+      message(sum(b), ' plots have plot_id with wrong date or malformed name (add these to fixplots.txt):')
+      print(plots$plot_id[b])
+   }
 
 
 

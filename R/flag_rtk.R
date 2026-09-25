@@ -7,56 +7,53 @@
 #' Note that a handful of RTKs were taken out of sequence, as in RTK failures and flagging on
 #' day 1.
 #'
+#' This function isn't very useful, as tablet GPS points are really noisy, and the time sequence
+#' isn't consistent. It may provide supporting evidence of bad RTKs.
+#'
 #' @param x everything data frame
-#' @param rtk RTK data frame
 #' @returns A data frame with lots of confusing info
 #' @importFrom lubridate as.duration
 #' @export
 
 
-flag_rtk <- function(x, rtk, path) {
+flag_rtk <- function(x) {
 
 
-# first, compare plot time (from photo) with RTK time
-   x <- x[order(x$plot_id), ]
-   d <- x[, c('plot_id', 'rtk_id', 'photo_date', 'date', 'easting', 'northing', 'tablet_latitude', 'tablet_longitude', 'observers', 'notes')]
+   # first, compare plot time (from photo) with RTK time
 
-   d <- sort_plots(d, path)
+   x$delta <- as.numeric(as.duration(difftime(x$photo_date, x$date))) / 60  # how long RTK was taken before photo (minutes)
+   b <- abs(x$delta) > 10                                                     # ignore deltas > 10 min
+   x$delta[b] <- NA
+   hist(x$delta, nclass = 25)
 
+   x$delta_lag_1 <- as.numeric(as.duration(difftime(x$photo_date, c(0, x$date[-nrow(x)])))) /60  # how long RTK was taken before previous photo (min)
+   b <- abs(x$delta_lag_1) > 25                                                     # ignore deltas > 10 min
+   x$delta_lag_1[b] <- NA
+   hist(x$delta_lag_1, nclass = 25)
 
-   d$delta <- as.numeric(as.duration(difftime(d$photo_date, d$date))) / 60  # how long RTK was taken before photo (minutes)
-   b <- abs(d$delta) > 10                                                     # ignore deltas > 10 min
-   d$delta[b] <- NA
-   hist(d$delta, nclass = 25)
-
-   d$delta_lag_1 <- as.numeric(as.duration(difftime(d$photo_date, c(0, d$date[-nrow(d)])))) /60  # how long RTK was taken before previous photo (min)
-   b <- abs(d$delta_lag_1) > 25                                                     # ignore deltas > 10 min
-   d$delta_lag_1[b] <- NA
-   hist(d$delta_lag_1, nclass = 25)
-
-   d$time_lag_better <- abs(d$delta_lag_1) < abs(d$delta)
+   x$time_lag_better <- abs(x$delta_lag_1) < abs(x$delta)
 
 
 
    # second, compare tablet GPS with RTK GPS
 
-   tab <- st_as_sf(d, coords = c('tablet_latitude', 'tablet_longitude')[c(2, 1)])
+   tab <- st_as_sf(x, coords = c('tablet_latitude', 'tablet_longitude')[c(2, 1)])
    st_crs(tab) <- 'EPSG:4326'
    tab <- st_transform(tab, crs = 'EPSG:6491')
-   d[, c('tablet_easting', 'tablet_northing')] <- st_coordinates(tab)
+   x[, c('tablet_easting', 'tablet_northing')] <- st_coordinates(tab)
 
-   d$dist <-       sqrt((d$easting - d$tablet_easting)^2 + (d$northing - d$tablet_northing)^2)
-   d$dist_lag_1 <- sqrt((d$easting - c(0, d$tablet_easting[-nrow(d)]))^2 + (d$northing - c(0, d$tablet_northing[-nrow(d)]))^2)
+   x$dist <-       sqrt((x$easting - x$tablet_easting)^2 + (x$northing - x$tablet_northing)^2)
+   x$dist_lag_1 <- sqrt((x$easting - c(0, x$tablet_easting[-nrow(x)]))^2 + (x$northing - c(0, x$tablet_northing[-nrow(x)]))^2)
 
-  # d$dist[d$dist > 30] <- NA
-   hist(d$dist, nclass = 25)
-   summary(d$dist)
+   # x$dist[x$dist > 30] <- NA
+   hist(x$dist, nclass = 25)
+   summary(x$dist)
 
-  # d$dist_lag_1[d$dist_lag_1 > 30] <- NA
-   hist(d$dist_lag_1, nclass = 25)
-   summary(d$dist_lag_1)
+   # x$dist_lag_1[x$dist_lag_1 > 30] <- NA
+   hist(x$dist_lag_1, nclass = 25)
+   summary(x$dist_lag_1)
 
-   d$dist_lag_better <- abs(d$dist_lag_1) < abs(d$dist)
+   x$dist_lag_better <- abs(x$dist_lag_1) < abs(x$dist)
 
-   d
+   x
 }
