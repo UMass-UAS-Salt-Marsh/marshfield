@@ -42,6 +42,8 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
                       get_photos = FALSE,
                       stop_on_error = FALSE) {
 
+   message('Processing plots data in ', path, '...')
+
 
    rtk <- gather_rtk(path = file.path(path, rtk_dir), result = NULL,
                      file.path(path, 'pars', rename_file = 'rtk_names.txt'))        # gather and reproject RTK points from Emlid downloads
@@ -101,6 +103,17 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
       plots$plotid_err[!v] <- TRUE
       err <- TRUE
    }
+
+
+ #  plots<<-plots;path<<-path;return()
+
+   # fix identified bad plot ids
+   plots <- fix_plots(plots, path)
+
+
+   # drop identified bad plots
+   plots <- drop_bad_plots(plots, path)
+
 
    # clean RTK ids
    plots$rtk_id <- clean_rtkids(plots$rtk_id)                              # clean up formatting of RTK ids in plots
@@ -215,14 +228,14 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
    # correct observers
-   fix_obs <- read.table(file.path(path, 'pars/fix_observers.txt'), sep = '\t', header = TRUE)
+   fix_obs <- read.table(file.path(path, 'pars/fix_observers.txt'), sep = '\t', header = TRUE, quote = '')
    b <- match(plots$observers, fix_obs$old)
    plots$observers[!is.na(b)] <- fix_obs$new[b[!is.na(b)]]
 
 
 
    # fix incorrect species names in data file (bogus specific for genera)
-   sp <- read.table(file.path(path, 'pars/species.txt'), sep = '\t', header = TRUE)
+   sp <- read.table(file.path(path, 'pars/species.txt'), sep = '\t', header = TRUE, quote = '')
    b <- match(pct_cover$species, sp$old)
    pct_cover$species[!is.na(b)] <- sp$new[b[!is.na(b)]]
 
@@ -231,8 +244,10 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    pd <- data.frame(month = ifelse(substr(plots$plot_id, 2, 2) == 'J', 7, 8), day = suppressWarnings(as.numeric(substr(plots$plot_id, 3, 4))))
    ad <- data.frame(month = month(plots$date), day = day(plots$date))
    b <- apply(pd != ad, 1, 'any')
+   b[is.na(b)] <- TRUE                                                           # catch malformed names
+
    if(any(b)) {
-      message(sum(b), ' plots have plot_id with wrong date or malformed name (add these to fixplots.txt):')
+      message(sum(b), ' plots have plot_id with wrong date or malformed name (add these to fix_plots.txt):')
       print(plots$plot_id[b])
    }
 
@@ -242,7 +257,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    # dropped gets dropped plots, with drop_confirmd and drop_reason
    # plots gets all plots that were not dropped
 
-   drop <- read.table(file.path(path, 'pars/drop_plots.txt'), sep = '\t', header = TRUE)
+   drop <- read.table(file.path(path, 'pars/drop_plots.txt'), sep = '\t', header = TRUE, quote = '')
    drop$drop <- TRUE
    plots <- merge(plots, drop, by = 'plot_id', all.x = TRUE)
    plots$drop[is.na(plots$drop)] <- FALSE
@@ -252,7 +267,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    message(nrow(dropped), ' plots dropped; ', nrow(plots), ' remaining')
 
 
-   fix_rtk <- read.table(file.path(path, 'pars/fix_rtk.txt'), sep = '\t', header = TRUE)
+   fix_rtk <- read.table(file.path(path, 'pars/fix_rtk.txt'), sep = '\t', header = TRUE, quote = '')
    plots <- merge(plots, fix_rtk, by = 'plot_id', all.x = TRUE)
    plots$fix_rtk_confirmed[is.na(plots$fix_rtk_confirmed)] <- FALSE
    plots$fix_rtk_reason[is.na(plots$fix_rtk_reason)] <- ''

@@ -3,8 +3,8 @@
 #' Steps through field plots, displaying the field photo for each plot on the left and a clip
 #' of an orthoimage or DEM centered on the plot on the right, with plot data in the center.
 #' Used to check RTK positions (a missed RTK shot shows up as subsequent plots being off by
-#' one) and to look for image anomalies. Reviews (reviewed, problems, rejected, keywords, and
-#' comments) are written to `pars/review.txt` every time something changes, so there's no
+#' one) and to look for image anomalies. Reviews (reviewed, problems, rejected, flagged, keywords,
+#' and comments) are written to `pars/review.txt` every time something changes, so there's no
 #' need to save.
 #'
 #' Plot data come from `prelim/plots.gpkg` and `prelim/pct_cover.txt`, photos from
@@ -31,7 +31,7 @@
 #'   `BA04` all blue tablet plots on August 4, `?A04` all plots on August 4, `PJ21-01` all
 #'   pink tablet plots on July 21 in section 1, and `*-03-` all plots in section 3.
 #' - **Keyword filter** one or more words, all of which must match. Precede a word with `!` to
-#'   negate it. Reserved words are `reviewed`, `problems`, `rejected`, `comments` (has comments),
+#'   negate it. Reserved words are `reviewed`, `problems`, `rejected`, `flagged`, `comments` (has comments),
 #'   `keywords` (has any keywords), `photo` (plot has a photo), `notes` (plot has notes), `rotated`
 #'   (photo has #'   been rotated), and `offset` (has an ortho offset recorded). `subclass=6` selects
 #'   subclass 6, and `subclass=6|7` subclass 6 or 7 (no spaces around `=`). `dz>0.8`, `dz<-0.5`, and
@@ -44,7 +44,8 @@
 #'   also use the left and right arrow keys, Home, and End (when you're not typing in a text
 #'   field).
 #' - **Review** check **Reviewed** once you've reviewed a plot (percent reviewed is based on
-#'   this), **Problems** to flag problems, and **Rejected** for plots that shouldn't be used.
+#'   this), **Problems** to flag problems, **Rejected** for plots that shouldn't be used, and
+#'   **flagged** for short-term use in comparing plots.
 #'   **Keywords** takes words separated by spaces or commas, which can be used in the keyword
 #'   filter. **Comments** can be anything.
 #' - **Rotation** field photos aren't oriented, so you can rotate them to match the ortho.
@@ -64,7 +65,7 @@
 #'   the site).
 #' - **Exit** exits the app (reviews are already saved).
 #'
-#' `review.txt` is tab-delimited with columns `plot_id`, `reviewed`, `problems`, `rejected`,
+#' `review.txt` is tab-delimited with columns `plot_id`, `reviewed`, `problems`, `rejected`, `flagged`,
 #' `keywords`, `comments` (newlines are stored as `\n`), `rotation` (degrees clockwise the photo
 #' is rotated to be north-up, so the top of the unrotated photo faces `-rotation`), and
 #' `center_x` and `center_y` (plot center, as fractions of the width and height of the photo
@@ -187,7 +188,8 @@ view_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
                            div(class = 'vp-checks',
                                checkboxInput('reviewed', 'Reviewed'),
                                checkboxInput('problems', 'Problems'),
-                               checkboxInput('rejected', 'Rejected')),
+                               checkboxInput('rejected', 'Rejected'),
+                               checkboxInput('flagged', 'Flagged')),
                            textInput('keywords', HTML('<h6 style="display: inline-block;">Keywords</h6>'), value = '',
                                      width = '100%'),
                            textAreaInput('comments', HTML('<h6 style="display: inline-block;">Review comments</h6>'),
@@ -301,6 +303,7 @@ view_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
             reviewed = !is.na(i) && review$reviewed[i],
             problems = !is.na(i) && review$problems[i],
             rejected = !is.na(i) && review$rejected[i],
+            flagged = !is.na(i) && review$flagged[i],
             keywords = if(is.na(i)) '' else review$keywords[i],
             comments = if(is.na(i)) '' else review$comments[i],
             rotation = if(is.na(i)) NA else review$rotation[i],
@@ -314,7 +317,7 @@ view_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
       observeEvent(input$review_edit, {                                                   # --- review edited in the browser
          e <- input$review_edit
          i <- match(e$plot_id, plots$plot_id)
-         if(is.na(i) | !e$field %in% c('reviewed', 'problems', 'rejected', 'keywords', 'comments', 'rotation', 'center'))
+         if(is.na(i) | !e$field %in% c('reviewed', 'problems', 'rejected', 'flagged', 'keywords', 'comments', 'rotation', 'center'))
             return()
          if(e$field == 'center') {                                                        #    center is sent as {x, y} or null
             review$center_x[i] <<- if(is.null(e$value)) NA else as.numeric(e$value$x)
@@ -513,7 +516,7 @@ var vpGeom = null;
 $(document).on("shiny:connected", function() {
    Shiny.addCustomMessageHandler("vp_set_review", function(m) {
       vpPlot = m.plot_id;
-      ["reviewed", "problems", "rejected"].forEach(function(f) { $("#" + f).prop("checked", m[f] === true); });
+      ["reviewed", "problems", "rejected", "flagged"].forEach(function(f) { $("#" + f).prop("checked", m[f] === true); });
       $("#keywords").val(m.keywords || "");
       $("#comments").val(m.comments || "");
       $("#review_fields :input").prop("disabled", vpPlot === null);
@@ -596,7 +599,7 @@ function vpSend(field, value, delay) {
    }, delay);
 }
 
-$(document).on("change", "#reviewed, #problems, #rejected", function() { vpSend(this.id, this.checked, 0); });
+$(document).on("change", "#reviewed, #problems, #rejected, #flagged", function() { vpSend(this.id, this.checked, 0); });
 $(document).on("input", "#keywords, #comments", function() { vpSend(this.id, this.value, 400); });
 
 $(document).on("dblclick", "#ortho img", function(e) {            // double-click on ortho records offset of plot center

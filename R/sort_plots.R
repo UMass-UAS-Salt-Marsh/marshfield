@@ -11,7 +11,7 @@
 sort_plots <- function(plots, path) {
 
 
-   days <- read.table(file.path(path, 'pars/field_days.txt'), sep = '\t', header = TRUE)
+   days <- read.table(file.path(path, 'pars/field_days.txt'), sep = '\t', header = TRUE, quote = '')
    days$day_n <- 1:nrow(days)
 
    y <- strsplit(toupper(plots$plot_id), '-')

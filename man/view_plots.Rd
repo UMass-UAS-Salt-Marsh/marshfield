@@ -21,8 +21,8 @@ view_plots(
 Steps through field plots, displaying the field photo for each plot on the left and a clip
 of an orthoimage or DEM centered on the plot on the right, with plot data in the center.
 Used to check RTK positions (a missed RTK shot shows up as subsequent plots being off by
-one) and to look for image anomalies. Reviews (reviewed, problems, rejected, keywords, and
-comments) are written to \code{pars/review.txt} every time something changes, so there's no
+one) and to look for image anomalies. Reviews (reviewed, problems, rejected, flagged, keywords,
+and comments) are written to \code{pars/review.txt} every time something changes, so there's no
 need to save.
 }
 \details{
@@ -50,7 +50,7 @@ character, and a trailing \code{*} is implied. Plot ids are
 \code{BA04} all blue tablet plots on August 4, \code{?A04} all plots on August 4, \code{PJ21-01} all
 pink tablet plots on July 21 in section 1, and \verb{*-03-} all plots in section 3.
 \item \strong{Keyword filter} one or more words, all of which must match. Precede a word with \code{!} to
-negate it. Reserved words are \code{reviewed}, \code{problems}, \code{rejected}, \code{comments} (has comments),
+negate it. Reserved words are \code{reviewed}, \code{problems}, \code{rejected}, \code{flagged}, \code{comments} (has comments),
 \code{keywords} (has any keywords), \code{photo} (plot has a photo), \code{notes} (plot has notes), \code{rotated}
 (photo has #'   been rotated), and \code{offset} (has an ortho offset recorded). \code{subclass=6} selects
 subclass 6, and \code{subclass=6|7} subclass 6 or 7 (no spaces around \code{=}). \code{dz>0.8}, \code{dz<-0.5}, and
@@ -63,7 +63,8 @@ macroalgae. Changes to reviews don't hide the current plot until the filter is c
 also use the left and right arrow keys, Home, and End (when you're not typing in a text
 field).
 \item \strong{Review} check \strong{Reviewed} once you've reviewed a plot (percent reviewed is based on
-this), \strong{Problems} to flag problems, and \strong{Rejected} for plots that shouldn't be used.
+this), \strong{Problems} to flag problems, \strong{Rejected} for plots that shouldn't be used, and
+\strong{flagged} for short-term use in comparing plots.
 \strong{Keywords} takes words separated by spaces or commas, which can be used in the keyword
 filter. \strong{Comments} can be anything.
 \item \strong{Rotation} field photos aren't oriented, so you can rotate them to match the ortho.
@@ -84,7 +85,7 @@ the site).
 \item \strong{Exit} exits the app (reviews are already saved).
 }
 
-\code{review.txt} is tab-delimited with columns \code{plot_id}, \code{reviewed}, \code{problems}, \code{rejected},
+\code{review.txt} is tab-delimited with columns \code{plot_id}, \code{reviewed}, \code{problems}, \code{rejected}, \code{flagged},
 \code{keywords}, \code{comments} (newlines are stored as \verb{\\n}), \code{rotation} (degrees clockwise the photo
 is rotated to be north-up, so the top of the unrotated photo faces \code{-rotation}), and
 \code{center_x} and \code{center_y} (plot center, as fractions of the width and height of the photo

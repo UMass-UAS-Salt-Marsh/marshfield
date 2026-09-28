@@ -14,7 +14,7 @@
 fix_sections <- function(plots, path) {
 
 
-   fix <- read.table(file.path(path, 'pars/fix_sections.txt'), sep = '\t', header = TRUE)
+   fix <- read.table(file.path(path, 'pars/fix_sections.txt'), sep = '\t', header = TRUE, quote = '')
    y <- strsplit(fix$start, '-')
    for(i in 1:length(y)) {                                                                                     # For each row in fix_sections,
       seq <- as.numeric(y[[i]][3]):as.numeric(fix$end[i])   # plot number sequence                             #    plot number sequence
