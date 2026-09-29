@@ -111,9 +111,6 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    plots <- fix_plots(plots, path)
 
 
-   # drop identified bad plots
-   plots <- drop_bad_plots(plots, path)
-
 
    # clean RTK ids
    plots$rtk_id <- clean_rtkids(plots$rtk_id)                              # clean up formatting of RTK ids in plots
@@ -240,18 +237,6 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    pct_cover$species[!is.na(b)] <- sp$new[b[!is.na(b)]]
 
 
-   # look for bad dates in plot ids
-   pd <- data.frame(month = ifelse(substr(plots$plot_id, 2, 2) == 'J', 7, 8), day = suppressWarnings(as.numeric(substr(plots$plot_id, 3, 4))))
-   ad <- data.frame(month = month(plots$date), day = day(plots$date))
-   b <- apply(pd != ad, 1, 'any')
-   b[is.na(b)] <- TRUE                                                           # catch malformed names
-
-   if(any(b)) {
-      message(sum(b), ' plots have plot_id with wrong date or malformed name (add these to fix_plots.txt):')
-      print(plots$plot_id[b])
-   }
-
-
 
    # drop bad plots and correct bad RTKs from parameter files
    # dropped gets dropped plots, with drop_confirmd and drop_reason
@@ -264,7 +249,23 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    dropped <- plots[plots$drop, ]
    plots <- plots[!plots$drop, !names(plots) %in% c('drop_confirmed', 'drop_reason', 'drop')]
 
-   message(nrow(dropped), ' plots dropped; ', nrow(plots), ' remaining')
+   cat(paste0('\n', nrow(dropped), ' plots dropped; ', nrow(plots), ' remaining. Dropped plots:\n'), sep = '')
+   print(dropped[, c('plot_id', 'drop_confirmed', 'drop_reason')], row.names = FALSE)
+
+
+
+   # look for bad dates in plot ids
+   pd <- data.frame(month = ifelse(substr(plots$plot_id, 2, 2) == 'J', 7, 8), day = suppressWarnings(as.numeric(substr(plots$plot_id, 3, 4))))
+   ad <- data.frame(month = month(plots$date), day = day(plots$date))
+   b <- apply(pd != ad, 1, 'any')
+   b[is.na(b)] <- TRUE                                                           # catch malformed names
+
+   if(any(b)) {
+      cat(pate0('\n', sum(b), ' plots have plot_id with wrong date or malformed name (add these to fix_plots.txt):'), sep = '')
+      print(plots$plot_id[b])
+      cat('\n')
+   }
+
 
 
    fix_rtk <- read.table(file.path(path, 'pars/fix_rtk.txt'), sep = '\t', header = TRUE, quote = '')
@@ -319,6 +320,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    sessions <<- sessions
 
 
+   cat('\n\nWriting result files...\n')
 
 
    # write preliminary shapefiles
