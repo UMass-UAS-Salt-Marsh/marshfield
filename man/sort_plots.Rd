@@ -10,8 +10,10 @@ sort_plots(plots, path)
 \arguments{
 \item{plots}{Plots data frame. Requires column plot_id}
 
-\item{path}{Project file path
-#' @returns Plots data frame, sorted}
+\item{path}{Project file path}
+}
+\value{
+Plots data frame, sorted
 }
 \description{
 Sort plots in canonical order

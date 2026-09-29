@@ -4,7 +4,7 @@
 #'
 #' @param plots Plots data frame. Requires column plot_id
 #' @param path Project file path
-#' #' @returns Plots data frame, sorted
+#' @returns Plots data frame, sorted
 #' @export
 
 

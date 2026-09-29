@@ -238,6 +238,8 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
 
+
+
    # drop bad plots and correct bad RTKs from parameter files
    # dropped gets dropped plots, with drop_confirmd and drop_reason
    # plots gets all plots that were not dropped
@@ -249,7 +251,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    dropped <- plots[plots$drop, ]
    plots <- plots[!plots$drop, !names(plots) %in% c('drop_confirmed', 'drop_reason', 'drop')]
 
-   cat(paste0('\n', nrow(dropped), ' plots dropped; ', nrow(plots), ' remaining. Dropped plots:\n'), sep = '')
+   cat('\n', nrow(dropped), ' plots dropped; ', nrow(plots), ' remaining. Dropped plots:\n', sep = '')
    print(dropped[, c('plot_id', 'drop_confirmed', 'drop_reason')], row.names = FALSE)
 
 
@@ -261,10 +263,11 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    b[is.na(b)] <- TRUE                                                           # catch malformed names
 
    if(any(b)) {
-      cat(pate0('\n', sum(b), ' plots have plot_id with wrong date or malformed name (add these to fix_plots.txt):'), sep = '')
+      cat('\n', sum(b), ' plots have plot_id with wrong date or malformed name (add these to fix_plots.txt):', sep = '')
       print(plots$plot_id[b])
       cat('\n')
    }
+
 
 
 
@@ -294,13 +297,17 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
    ##  rtk_errors <<- flag_rtk(plots, rtk, path)             # ...................... try to find RTK errors .....................
 
-
+   plots <- rtk_sequence(plots)
+   cat('\n', sum(plots$rtk_nonseq), ' RTK points seem to be out of sequence, marked by rtk_nonseq:\n', sep = '')
+   print(plots[plots$rtk_nonseq, c('plot_id', 'rtk_id')])
+   rtk_seq <- plots[, c('date', 'plot_id', 'rtk_id', 'rtk_nonseq', 'plotid_err', 'rtkid_err', 'notes')]
+   cat('\nSee at global rtk_seq and rtk_seq.txt to resolve these\n')
 
 
    # split plots (primary data) and auxil (corresponding, with extra info)
 
 
-   primary <- c('plot_id', 'date', 'subclass', 'site', 'rtk_id', 'easting', 'northing', 'elevation', 'lateral_rms', 'section', 'observers', 'notes', 'has_photo', 'plotid_err', 'rtkid_err')
+   primary <- c('plot_id', 'date', 'subclass', 'site', 'rtk_id', 'easting', 'northing', 'elevation', 'lateral_rms', 'section', 'observers', 'notes', 'has_photo', 'plotid_err', 'rtkid_err', 'rtk_nonseq')
    auxil <- plots[, c('plot_id', names(plots)[!names(plots) %in% primary])]
    everything <- plots
    plots <- plots[, primary]
@@ -318,6 +325,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    rtk <<- rtk
    pct_cover <<- pct_cover
    sessions <<- sessions
+   rtk_seq <<- rtk_seq
 
 
    cat('\n\nWriting result files...\n')
@@ -345,7 +353,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
    # write preliminary tables
-   tables <- c('plots', 'everything', 'dropped', 'rtk', 'pct_cover', 'sessions', 'auxil')
+   tables <- c('plots', 'everything', 'dropped', 'rtk', 'pct_cover', 'sessions', 'auxil', 'rtk_seq')
    for(f in tables)
       write.table(eval(parse(text = f)), file.path(pathP, paste0(f, '.txt')), sep = '\t', row.names = FALSE, quote = FALSE)
 
