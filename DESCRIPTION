@@ -27,7 +27,8 @@ Imports:
     bslib,
     shinybusy,
     zip,
-    curl
-Remotes:
-Suggests: 
+    curl,
+    exifr,
+    lubridate,
+    stringi
 Config/roxygen2/version: 8.1.0
