@@ -185,6 +185,12 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    plots <- merge(plots, sessions[, c('session_id', 'observers')], by = 'session_id', all.y = FALSE)
 
 
+
+   # correct section numbers
+   plots <- fix_sections(plots, path)
+
+
+
    # rescue plot photo from my iPhone! *************************************   <<<<<------
 
 
@@ -219,9 +225,6 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    rtk_names <- c('rtk_id', 'easting', 'northing', 'elevation', 'longitude', 'latitude', 'ellipsoidal_height', 'lateral_rms', 'elevation_rms', 'date', 'PDOP', 'tilt')
    plots <- merge(plots, rtk[, rtk_names], by = 'rtk_id', all.y = FALSE)
 
-
-   # correct section numbers
-   plots <- fix_sections(plots, path)
 
 
    # correct observers
