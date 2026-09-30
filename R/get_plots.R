@@ -191,10 +191,6 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
 
-   # rescue plot photo from my iPhone! *************************************   <<<<<------
-
-
-
    # rename photos to plot numbers and pull plot date & time from EXIF data
    # photos have been downloaded to photos/downloads; here, we copy them to photos/plots renamed to <plot id>.jpg
 

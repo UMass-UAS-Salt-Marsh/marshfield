@@ -399,7 +399,7 @@ view_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
          d <- orthos[orthos$site == input$site & orthos$type == 'dem', ]
          lapply(seq_len(nrow(d)), function(j) {
             dz <- get_dz(d$file[j])[i]
-            div(paste0('DEM − RTK height: ', if(is.na(dz)) 'no data' else sprintf('%.1f cm', 100 * dz),
+            div(paste0('DEM - RTK height: ', if(is.na(dz)) 'no data' else sprintf('%.1f cm', 100 * dz),
                        if(nrow(d) > 1) paste0(' (', d$name[j], ')')))
          })
       })
@@ -412,7 +412,7 @@ view_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
          d <- get_offset(i, input$ortho)
          if(is.null(d))
             return('Double-click the plot center on the image to record offset')
-         sprintf('Offset: dx = %.2f, dy = %.2f  (%.2f m toward %d°)', d[1], d[2], sqrt(sum(d ^ 2)),
+         sprintf('Offset: dx = %.2f, dy = %.2f  (%.2f m toward %d degrees)', d[1], d[2], sqrt(sum(d ^ 2)),
                  round((atan2(d[1], d[2]) * 180 / pi) %% 360))
       })
 

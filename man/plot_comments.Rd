@@ -4,7 +4,7 @@
 \alias{plot_comments}
 \title{Show comments from all plots that have them}
 \usage{
-plot_comments(x = plots)
+plot_comments(plots)
 }
 \arguments{
 \item{plots}{Data frame with plot data}

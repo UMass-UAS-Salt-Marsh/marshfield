@@ -13,6 +13,7 @@
 #' @param x everything data frame
 #' @returns A data frame with lots of confusing info
 #' @importFrom lubridate as.duration
+#' @importFrom graphics hist
 #' @export
 
 

@@ -5,10 +5,10 @@
 #' @export
 
 
-plot_comments <- function(x = plots) {
+plot_comments <- function(plots) {
 
 
-   z <- x[x$notes != '', c('plot_id', 'subclass', 'rtk_id', 'observers', 'photo_date', 'plotid_err', 'rtkid_err', 'notes')]
+   z <- plots[plots$notes != '', c('plot_id', 'subclass', 'rtk_id', 'observers', 'photo_date', 'plotid_err', 'rtkid_err', 'notes')]
    print(z, right = FALSE)
    invisible(z)
 
