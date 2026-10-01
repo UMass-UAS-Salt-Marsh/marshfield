@@ -17,8 +17,8 @@
 vp_read_review <- function(file, plot_ids) {
 
    review <- data.frame(plot_id = plot_ids, reviewed = FALSE, problems = FALSE, rejected = FALSE,
-                        flagged = FALSE, keywords = '', comments = '', rotation = NA_real_,
-                        center_x = NA_real_, center_y = NA_real_)
+                        split = FALSE, coverr = FALSE, flagged = FALSE, keywords = '', comments = '',
+                        rotation = NA_real_, center_x = NA_real_, center_y = NA_real_)
    extra <- review[0, ]
 
    if(file.exists(file)) {
@@ -26,7 +26,7 @@ vp_read_review <- function(file, plot_ids) {
                       colClasses = 'character', na.strings = character(0))
       for(f in names(review)[!names(review) %in% names(x)])                    # add any missing columns
          x[[f]] <- ''
-      for(f in c('reviewed', 'problems', 'rejected', 'flagged'))
+      for(f in c('reviewed', 'problems', 'rejected', 'split', 'coverr', 'flagged'))
          x[[f]] <- x[[f]] %in% c('TRUE', 'T', 'true', '1')
       for(f in c('rotation', 'center_x', 'center_y'))
          x[[f]] <- suppressWarnings(as.numeric(x[[f]]))
@@ -60,7 +60,8 @@ vp_read_review <- function(file, plot_ids) {
 vp_write_review <- function(review, extra, file) {
 
    x <- rbind(review, extra)
-   keep <- x$reviewed | x$problems | x$rejected | x$keywords != '' | x$comments != '' |
+   keep <- x$reviewed | x$problems | x$rejected | x$split | x$coverr | x$flagged |
+      x$keywords != '' | x$comments != '' |
       !is.na(x$rotation) | !is.na(x$center_x)
    x <- x[keep, ]
    x <- x[order(x$plot_id), ]
