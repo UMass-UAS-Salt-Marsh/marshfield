@@ -105,7 +105,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    }
 
 
- #  plots<<-plots;path<<-path;return()
+   #  plots<<-plots;path<<-path;return()
 
    # fix identified bad plot ids
    plots <- fix_plots(plots, path)
@@ -113,10 +113,10 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
    # clean RTK ids
-   plots$rtk_id <- clean_rtkids(plots$rtk_id)                              # clean up formatting of RTK ids in plots
-   rtk$rtk_id <- clean_rtkids(rtk$rtk_id)                                    # clean up formatting of RTK ids in RTK data
+   plots$rtk_id <- clean_rtkids(plots$rtk_id)                                 # clean up formatting of RTK ids in plots
+   rtk$rtk_id <- clean_rtkids(rtk$rtk_id)                                     # clean up formatting of RTK ids in RTK data
 
-   v <- valid_rtkids(plots$rtk_id)                                         # valid RTK ids in plots data
+   v <- valid_rtkids(plots$rtk_id)                                            # valid RTK ids in plots data
    if(any(!v)) {
       cat('\nBad or missing RTK ids in plot data:\n')
       print(data.frame(row = 1:nrow(plots), rtk_id = plots$rtk_id, notes = plots$notes)[!v,], quote = FALSE, row.names = FALSE)
@@ -124,7 +124,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
       err <- TRUE
    }
 
-   v2 <- valid_rtkids(rtk$rtk_id)                                            # valid RTK ids in RTK data
+   v2 <- valid_rtkids(rtk$rtk_id)                                             # valid RTK ids in RTK data
    if(any(!v2)) {
       cat('\nBad RTK ids in RTK data:\n')
       print(data.frame(row = 1:nrow(rtk), rtk_id = rtk$rtk_id)[!v2,], quote = FALSE, row.names = FALSE)
@@ -133,14 +133,34 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    }
 
 
-   d <- duplicated(rtk$rtk_id)                                               # dups ids in RTK data
+
+   # Now rename duplicated RTK ids according to dedup_rtk.txt
+   dup_rtk <- read.table(file.path(path, 'pars/dedup_rtk.txt'), sep = '\t', header = TRUE, quote = '')
+   rtk <- rtk[order(rtk$date), ]                                              # sort RTKs by date so sequence works out (assumed to be in order in dedup_rtk.txt)
+
+   u <- unique(dup_rtk$rtk_id)
+   for(i in u) {
+      b <- rtk$rtk_id %in% i
+      if(any(b)) {
+         if(sum(b) != sum(dup_rtk$rtk_id %in% i))
+            stop('You have the wrong number of duplicates in dedup_rtk.txt for ', i)
+         rtk$rtk_id[b] <- dup_rtk$new[dup_rtk$rtk_id %in% i]
+      }
+   }
+
+   cat('\nRenamed ', length(u), ' RTK ids in rtk\n', sep = '')
+
+
+
+   d <- duplicated(rtk$rtk_id)                                                # dup ids in RTK data
    if(any(d)) {
-      cat('\nDuplicated RTK ids in RTK data:\n')
+      cat('\nDuplicated RTK ids in RTK data: (these should have been fixed in dedup_rtk.txt)\n')
       d <- rtk$rtk_id %in% rtk$rtk_id[d]
       print(data.frame(row = 1:nrow(rtk), rtk_id = rtk$rtk_id, old_rtk_id = rtk$old_rtk_id)[d,], quote = FALSE, row.names = FALSE)
       rtk$rtkid_dup[d] <- TRUE
       err <- TRUE
    }
+
 
 
    if(err & stop_on_error)
