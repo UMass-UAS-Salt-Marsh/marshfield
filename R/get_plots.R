@@ -335,6 +335,10 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
       plots <- sort_plots(plots, path)                            # sort plots by date, tablet, section, and plot number
 
+      cols <- c('reviewed', 'problems', 'split', 'coverr')
+      plots[cols][is.na(plots[cols])] <- FALSE
+      plots$comments[is.na(plots$comments)] <- ''
+
       r <- plots$rejected
       r[is.na(r)] <- FALSE
       cat('\n', sum(r), ' plots that were rejected on review dropped; ', sum(!r), ' remaining. Dropped plots:\n', sep = '')
@@ -347,10 +351,9 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
 
-
    # split plots (primary data) and auxil (corresponding, with extra info)
    primary <- c('plot_id', 'date', 'subclass', 'site', 'rtk_id', 'easting', 'northing', 'elevation', 'lateral_rms', 'section', 'observers',
-                'notes', 'reviewed', 'problems', 'rejected', 'split', 'coverr', 'comments', 'has_photo', 'plotid_err', 'rtkid_err', 'rtk_nonseq')
+                'notes', 'reviewed', 'problems', 'split', 'coverr', 'comments', 'has_photo')
    auxil <- plots[, c('plot_id', names(plots)[!names(plots) %in% primary])]
    everything <- plots
    plots <- plots[, primary]
