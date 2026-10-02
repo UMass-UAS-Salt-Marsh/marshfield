@@ -32,7 +32,10 @@ importFrom(bslib,
   card
 )
 importFrom(curl,curl_download)
-importFrom(dplyr,distinct)
+importFrom(dplyr,
+  bind_rows,
+  distinct
+)
 importFrom(exifr,read_exif)
 importFrom(grDevices,
   as.raster,

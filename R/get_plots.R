@@ -27,7 +27,7 @@
 #'    - data = Full dataset
 #'    - z = Summarized data
 #' @importFrom utils read.csv
-#' @importFrom dplyr distinct
+#' @importFrom dplyr distinct bind_rows
 #' @importFrom stringi stri_extract_first_regex
 #' @importFrom exifr read_exif
 #' @importFrom lubridate ymd_hms with_tz month day
@@ -105,7 +105,6 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    }
 
 
-   #  plots<<-plots;path<<-path;return()
 
    # fix identified bad plot ids
    plots <- fix_plots(plots, path)
@@ -119,7 +118,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    v <- valid_rtkids(plots$rtk_id)                                            # valid RTK ids in plots data
    if(any(!v)) {
       cat('\nBad or missing RTK ids in plot data:\n')
-      print(data.frame(row = 1:nrow(plots), rtk_id = plots$rtk_id, notes = plots$notes)[!v,], quote = FALSE, row.names = FALSE)
+      print(data.frame(row = 1:nrow(plots), rtk_id = plots$rtk_id, notes = plots$notes)[!v,], quote = FALSE, row.names = FALSE, right = FALSE)
       plots$rtkid_err[!v] <- TRUE
       err <- TRUE
    }
@@ -131,7 +130,6 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
       rtk$rtkid_err[!v2] <- TRUE
       err <- TRUE
    }
-
 
 
    # Now rename duplicated RTK ids according to dedup_rtk.txt
@@ -151,7 +149,6 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    cat('\nRenamed ', length(u), ' RTK ids in rtk\n', sep = '')
 
 
-
    d <- duplicated(rtk$rtk_id)                                                # dup ids in RTK data
    if(any(d)) {
       cat('\nDuplicated RTK ids in RTK data: (these should have been fixed in dedup_rtk.txt)\n')
@@ -168,7 +165,12 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
 
-   # split out percent cover to a separate table and collapse plots table
+   # correct section numbers - LAST CHANGE TO PLOT IDs!
+   plots <- fix_sections(plots, path)
+
+
+
+   # split out percent cover to a separate table and collapse plots table. This must be done AFTER any changes to plot ids
 
    pct_cover <- plots[, c('plot_id', 'species_code', 'species', 'pct_cover')]
    plots <- plots[, !names(plots) %in% c('species_code', 'species', 'pct_cover')]
@@ -181,8 +183,8 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    if(any(d)) {
       cat('\n', sum(d), ' duplicated RTK ids in plot data:\n', sep = '')
       d <- plots$rtk_id %in% plots$rtk_id[d]
-      print(data.frame(row = 1:nrow(plots), rtk_id = plots$rtk_id, old_rtk_id = plots$old_rtk_id, notes = plots$notes)[d,], quote = FALSE, row.names = FALSE)
-      rtk$rtkid_dup[d] <- TRUE
+      print(data.frame(row = 1:nrow(plots), plot_id = plots$plot_id, rtk_id = plots$rtk_id, old_rtk_id = plots$old_rtk_id, notes = plots$notes)[d,], quote = FALSE, row.names = FALSE, right = FALSE)
+      plots$rtkid_dup[d] <- TRUE
       err <- TRUE
    }
 
@@ -203,11 +205,6 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
    plots <- merge(plots, sessions[, c('session_id', 'observers')], by = 'session_id', all.y = FALSE)
-
-
-
-   # correct section numbers
-   plots <- fix_sections(plots, path)
 
 
 
@@ -236,10 +233,6 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
    rtk$date <- ymd_hms(rtk$date, tz = 'UTC') |>
       with_tz('America/New_York')                                # RTK points are labeled as UTC, but are really EDT
-
-
-   rtk_names <- c('rtk_id', 'easting', 'northing', 'elevation', 'longitude', 'latitude', 'ellipsoidal_height', 'lateral_rms', 'elevation_rms', 'date', 'PDOP', 'tilt')
-   plots <- merge(plots, rtk[, rtk_names], by = 'rtk_id', all.y = FALSE)
 
 
 
@@ -271,21 +264,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    plots <- plots[!plots$drop, !names(plots) %in% c('drop_confirmed', 'drop_reason', 'drop')]
 
    cat('\n', nrow(dropped), ' plots dropped; ', nrow(plots), ' remaining. Dropped plots:\n', sep = '')
-   print(dropped[, c('plot_id', 'drop_confirmed', 'drop_reason')], row.names = FALSE)
-
-
-
-   # look for bad dates in plot ids
-   pd <- data.frame(month = ifelse(substr(plots$plot_id, 2, 2) == 'J', 7, 8), day = suppressWarnings(as.numeric(substr(plots$plot_id, 3, 4))))
-   ad <- data.frame(month = month(plots$date), day = day(plots$date))
-   b <- apply(pd != ad, 1, 'any')
-   b[is.na(b)] <- TRUE                                                           # catch malformed names
-
-   if(any(b)) {
-      cat('\n', sum(b), ' plots have plot_id with wrong date or malformed name (add these to fix_plots.txt):', sep = '')
-      print(plots$plot_id[b])
-      cat('\n')
-   }
+   print(dropped[, c('plot_id', 'drop_confirmed', 'drop_reason')], row.names = FALSE, right = FALSE)
 
 
 
@@ -305,28 +284,73 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    if(any(d)) {
       cat('\nAfter RTK corrections, ', sum(d), ' duplicated RTK ids in plot data:\n', sep = '')
       d <- plots$rtk_id %in% plots$rtk_id[d]
-      print(data.frame(row = 1:nrow(plots), rtk_id = plots$rtk_id, old_rtk_id = plots$old_rtk_id, notes = plots$notes)[d,], quote = FALSE, row.names = FALSE)
-      rtk$rtkid_dup[d] <- TRUE
+      print(data.frame(row = 1:nrow(plots), plot_id = plots$plot_id, rtk_id = plots$rtk_id, old_rtk_id = plots$old_rtk_id, notes = plots$notes)[d,], quote = FALSE, row.names = FALSE, right = FALSE)
+      plots$rtkid_dup[d] <- TRUE
       err <- TRUE
    }
+
+
+   # now that RTK ids are cleaned up, join plots to RTK data
+   rtk_names <- c('rtk_id', 'easting', 'northing', 'elevation', 'longitude', 'latitude', 'ellipsoidal_height', 'lateral_rms', 'elevation_rms', 'date', 'PDOP', 'tilt')
+   plots <- merge(plots, rtk[, rtk_names], by = 'rtk_id', all.y = FALSE)
+
+
+
+   # look for bad dates in plot ids
+   pd <- data.frame(month = ifelse(substr(plots$plot_id, 2, 2) == 'J', 7, 8), day = suppressWarnings(as.numeric(substr(plots$plot_id, 3, 4))))
+   ad <- data.frame(month = month(plots$date), day = day(plots$date))
+   b <- apply(pd != ad, 1, 'any')
+   b[is.na(b)] <- TRUE                                                           # catch malformed names
+
+   if(any(b)) {
+      cat('\n', sum(b), ' plots have plot_id with wrong date or malformed name (add these to fix_plots.txt):', sep = '')
+      print(plots$plot_id[b])
+      cat('\n')
+   }
+
 
 
    plots <- sort_plots(plots, path)                            # sort plots by date, tablet, section, and plot number
 
 
-   ##  rtk_errors <<- flag_rtk(plots, rtk, path)             # ...................... try to find RTK errors .....................
+   ##  rtk_errors <<- flag_rtk(plots, rtk, path)               # ...try to find RTK errors...in practice, this is worthless
 
+
+   # flag out-of-sequence RTK points
    plots <- rtk_sequence(plots)
    cat('\n', sum(plots$rtk_nonseq), ' RTK points seem to be out of sequence, marked by rtk_nonseq:\n', sep = '')
-   print(plots[plots$rtk_nonseq, c('plot_id', 'rtk_id')])
+   print(plots[plots$rtk_nonseq, c('plot_id', 'rtk_id')], right = FALSE)
    rtk_seq <- plots[, c('date', 'plot_id', 'rtk_id', 'rtk_nonseq', 'plotid_err', 'rtkid_err', 'notes')]
    cat('\nSee at global rtk_seq and rtk_seq.txt to resolve these\n')
 
 
+
+   # include review data if available, and drop rejected plots
+   f <- file.path(path, 'pars', 'review.txt')
+   if(file.exists(f)) {
+      cat('\nJoining in review fields from view_plots()...\n')
+      review <- read.table(f, sep = '\t', header = TRUE, quote = '')
+      keep <- c('plot_id', 'reviewed', 'problems', 'rejected', 'split', 'coverr', 'comments')
+      plots <- merge(plots, review[, keep], by = 'plot_id', all.x = TRUE, all.y = FALSE)
+
+      plots <- sort_plots(plots, path)                            # sort plots by date, tablet, section, and plot number
+
+      r <- plots$rejected
+      r[is.na(r)] <- FALSE
+      cat('\n', sum(r), ' plots that were rejected on review dropped; ', sum(!r), ' remaining. Dropped plots:\n', sep = '')
+      print(plots[r, c('plot_id', 'comments')], row.names = FALSE, right = FALSE)
+
+      dropped <- bind_rows(dropped, plots[r, ])
+
+      plots <- plots[!r, !names(plots) %in% 'rejected']
+   }
+
+
+
+
    # split plots (primary data) and auxil (corresponding, with extra info)
-
-
-   primary <- c('plot_id', 'date', 'subclass', 'site', 'rtk_id', 'easting', 'northing', 'elevation', 'lateral_rms', 'section', 'observers', 'notes', 'has_photo', 'plotid_err', 'rtkid_err', 'rtk_nonseq')
+   primary <- c('plot_id', 'date', 'subclass', 'site', 'rtk_id', 'easting', 'northing', 'elevation', 'lateral_rms', 'section', 'observers',
+                'notes', 'reviewed', 'problems', 'rejected', 'split', 'coverr', 'comments', 'has_photo', 'plotid_err', 'rtkid_err', 'rtk_nonseq')
    auxil <- plots[, c('plot_id', names(plots)[!names(plots) %in% primary])]
    everything <- plots
    plots <- plots[, primary]

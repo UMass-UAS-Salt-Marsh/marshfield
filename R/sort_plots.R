@@ -19,6 +19,8 @@ sort_plots <- function(plots, path) {
    y2 <- sapply(y, '[[', 2)                     # part 2: section
    y3 <- sapply(y, '[[', 3)                     # part 3: plot number
 
+   plots <- plots[, !names(plots) %in% c('tablet', 'day', 'section', 'plot_no', 'day_n')]
+
    plots$tablet <- substr(y1, 1, 1)
    plots$day <- substr(y1, 2, 4)
    plots$section <- y2

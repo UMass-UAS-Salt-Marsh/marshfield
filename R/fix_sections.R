@@ -18,13 +18,11 @@ fix_sections <- function(plots, path) {
    y <- strsplit(fix$start, '-')
    for(i in 1:length(y)) {                                                                                     # For each row in fix_sections,
       seq <- as.numeric(y[[i]][3]):as.numeric(fix$end[i])   # plot number sequence                             #    plot number sequence
-      b <- match(paste(y[[i]][1], y[[i]][2], sprintf('%03d', seq), sep = '-'), plots$plot_id)                  #    matching rows in plots
-      res <- paste(y[[i]][1], sprintf('%02d', fix$is_section[i]), sprintf('%03d', seq), sep = '-')[!is.na(b)]  #    new plot ids (omitting missing plots)
-      b <- b[!is.na(b)]                                                                                        #    drop missing plots in index
-      plots$plot_id[b] <- res                                                                                  #    update section in plot id
+      old <- paste(y[[i]][1], y[[i]][2], sprintf('%03d', seq), sep = '-')                                      #    old plot ids
+      new <- paste(y[[i]][1], sprintf('%02d', fix$is_section[i]), sprintf('%03d', seq), sep = '-')             #    new plot ids
+      b <- match(plots$plot_id, old)                                                                           #    for every row in plots (including duplicate plot ids), index into old
+      plots$plot_id[!is.na(b)] <- new[b[!is.na(b)]]                                                            #    update section in plot id
    }
 
    plots
 }
-
-
