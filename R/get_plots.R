@@ -171,14 +171,26 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
    # split out percent cover to a separate table and collapse plots table. This must be done AFTER any changes to plot ids
-
    pct_cover <- plots[, c('plot_id', 'species_code', 'species', 'pct_cover')]
    plots <- plots[, !names(plots) %in% c('species_code', 'species', 'pct_cover')]
    plots <- plots[!duplicated(plots$plot_id), ]
 
 
-   # Now check for duplicated RTK ids in plot data
+   # fix errors in percent cover
+   x <- read.table(file.path(path, 'pars/fix_pct_cover.txt'), sep = '\t', header = TRUE, quote = '')
+   key_pc <- paste(pct_cover$plot_id, pct_cover$species_code)
+   key_x <- paste(x$plot_id, x$species_code)
 
+   new <- x[, c('plot_id', 'species_code', 'pct_cover')]
+   new$species <- pct_cover$species[match(new$species_code, pct_cover$species_code)]   # look up names
+
+   pct_cover <- rbind(pct_cover[!key_pc %in% key_x, ], new[, names(pct_cover)])
+   pct_cover <- pct_cover[order(pct_cover$plot_id, pct_cover$species_code), ]
+   rownames(pct_cover) <- NULL
+
+
+
+   # Now check for duplicated RTK ids in plot data
    d <- duplicated(plots$rtk_id)
    if(any(d)) {
       cat('\n', sum(d), ' duplicated RTK ids in plot data:\n', sep = '')
@@ -190,14 +202,12 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
    # clean up plots table some more
-
    plots$site_name <- 'Essex'
    plots$subclass <- as.numeric(stri_extract_first_regex(plots$subclass, '\\d+'))
 
 
 
    # join in observers from session
-
    sessions$observers <- gsub(',|and ', '', sessions$observers)    # clean up
    sessions$observers <- gsub('YJS', 'YKS', sessions$observers)    # typo
    sessions$observers <- gsub('et al', '+', sessions$observers)
