@@ -10,7 +10,7 @@ get_plots(
   session_file = "plots/field_sessions.csv",
   rtk_dir = "RTK",
   get_photos = FALSE,
-  stop_on_error = FALSE
+  plot_radius = 0.7
 )
 }
 \arguments{
@@ -24,7 +24,7 @@ get_plots(
 
 \item{get_photos}{If TRUE, download all photos (checks to see if each exists first)}
 
-\item{stop_on_error}{If TRUE, throw an error if there are any bad plot ids or RTK ids}
+\item{plot_radius}{Radius of plots (m)}
 }
 \value{
 List of
@@ -41,15 +41,39 @@ Note some ugly hard-coded fixes: test data are dropped, and a missing date is ad
 
 Several parameter files (tab-delimited text) are in pars/. They include
 \itemize{
-\item \code{rtk_names.txt} Fields to drop (use \code{-}) or rename in RTK: \code{old}, \code{new}
 \item \code{sessions_names.txt} Fields to drop (use \code{-}) or rename in sessions: \code{old}, \code{new}
 \item \code{plots_names.txt} Fields to drop (use \code{-}) or rename in plots: \code{old}, \code{new}
-\item \code{fix_sections.txt} Split field days into sections: \code{start}, \code{end}, \code{is_section}, \code{reason}
-\item \code{observers.txt} List of observers initials and names: \code{initials}, \code{name}
+\item \code{rtk_names.txt} Fields to drop (use \code{-}) or rename in RTK: \code{old}, \code{new}
 \item \code{field_days.txt} Day abbreviations (J21, J22, ..., A07) in order, for sorting data: \code{day}
-\item \code{species.txt} Change genera incorrectly listed as species by app in percent cover
+\item \code{fix_plots.txt} Fix bad plot ids: \code{old}, \code{new}, \code{fix_plots_reason}
+\item \code{drop_plots.txt} Plots to drop: \code{plot_id}, \code{drop_confirmed}, and \code{drop_reason}
+\item \code{fix_observers.txt} Fix errors and inconsistencies in observers: \code{old}, \code{new}, \code{reason}.
+Full observer names are in observers.txt.
+\item \code{fix_sections.txt} Split field days into sections: \code{start}, \code{end}, \code{is_section}, \code{reason}
 \item \code{fix_rtk.txt} RTK ids to reassign (usually thanks to off-by-one errors): \code{plot_id},
 \code{new_rtk_id}, \code{fix_rtk_confirmed}, \code{fix_rtk_reason}
-\item \code{drop_plots.txt} Plots to drop: \code{plot_id}, \code{drop_confirmed}, and \code{drop_reason}
+\item \code{dedup_rtk.txt} Drop duplicated RTKs with same rtk_id: \code{rtk_id}, \code{seq}, \code{new}, \code{reason}
+\item \code{species.txt} Change genera incorrectly listed as species by app in percent cover
+\item \code{fix_pct_cover.txt} Changes to percent cover fields: \code{plot_id}, \code{species_code}, \code{pct_cover}, \code{reason}
+\item \code{review.txt} Written by \code{view_plots}, used to drop rejected plots. DO NOT EDIT!
+}
+
+Results include GeoPackages written to path/results:
+\itemize{
+\item \code{plots.gpkg} 3d point shapefile of plots, primary fields only
+\item \code{circles.gpkg} 2d circle shapefile of plot area, primary fields only
+\item \code{everything.gpkg} 3d point shapefile of plots, all fields included
+}
+
+Result tables are written as tab-delimited text to path/results:
+\itemize{
+\item \code{plots} Plots data, primary fields
+\item \code{everything} Plots data, all fields
+\item \code{auxil} Auxillary data (\code{plots} + \code{auxil} = \code{everything})
+\item \code{dropped} Plots data, all fields, dropped rows
+\item \code{pct_cover} Percent cover, to join with \code{plots} on \code{plot_id}
+\item \code{rtk} RTK data, including dropped rows
+\item \code{sessions} Original session data from \code{saltmarshdata} app
+\item \code{rtk_seq} RTK sequencing check; \code{rtk_nonseq} marks potential sequencing errors
 }
 }

@@ -6,30 +6,54 @@
 #'
 #' Several parameter files (tab-delimited text) are in pars/. They include
 #'
-#' - `rtk_names.txt` Fields to drop (use `-`) or rename in RTK: `old`, `new`
 #' - `sessions_names.txt` Fields to drop (use `-`) or rename in sessions: `old`, `new`
 #' - `plots_names.txt` Fields to drop (use `-`) or rename in plots: `old`, `new`
-#' - `fix_sections.txt` Split field days into sections: `start`, `end`, `is_section`, `reason`
-#' - `observers.txt` List of observers initials and names: `initials`, `name`
+#' - `rtk_names.txt` Fields to drop (use `-`) or rename in RTK: `old`, `new`
 #' - `field_days.txt` Day abbreviations (J21, J22, ..., A07) in order, for sorting data: `day`
-#' - `species.txt` Change genera incorrectly listed as species by app in percent cover
-#' - `fix_rtk.txt` RTK ids to reassign (usually thanks to off-by-one errors): `plot_id`,
-#'    `new_rtk_id`, `fix_rtk_confirmed`, `fix_rtk_reason`
+#'
+#' - `fix_plots.txt` Fix bad plot ids: `old`, `new`, `fix_plots_reason`
 #' - `drop_plots.txt` Plots to drop: `plot_id`, `drop_confirmed`, and `drop_reason`
+#' - `fix_observers.txt` Fix errors and inconsistencies in observers: `old`, `new`, `reason`.
+#'    Full observer names are in observers.txt.
+#' - `fix_sections.txt` Split field days into sections: `start`, `end`, `is_section`, `reason`
+#'
+#' - `fix_rtk.txt` RTK ids to reassign (usually thanks to off-by-one errors): `plot_id`,
+#'   `new_rtk_id`, `fix_rtk_confirmed`, `fix_rtk_reason`
+#' - `dedup_rtk.txt` Drop duplicated RTKs with same rtk_id: `rtk_id`, `seq`, `new`, `reason`
+#'
+#' - `species.txt` Change genera incorrectly listed as species by app in percent cover
+#' - `fix_pct_cover.txt` Changes to percent cover fields: `plot_id`, `species_code`, `pct_cover`, `reason`
+#'
+#' - `review.txt` Written by `view_plots`, used to drop rejected plots. DO NOT EDIT!
+#'
+#'
+#' Results include GeoPackages written to path/results:
+#' - `plots.gpkg` 3d point shapefile of plots, primary fields only
+#' - `circles.gpkg` 2d circle shapefile of plot area, primary fields only
+#' - `everything.gpkg` 3d point shapefile of plots, all fields included
+#'
+#' Result tables are written as tab-delimited text to path/results:
+#' - `plots` Plots data, primary fields
+#' - `everything` Plots data, all fields
+#' - `auxil` Auxillary data (`plots` + `auxil` = `everything`)
+#' - `dropped` Plots data, all fields, dropped rows
+#' - `pct_cover` Percent cover, to join with `plots` on `plot_id`
+#' - `rtk` RTK data, including dropped rows
+#' - `sessions` Original session data from `saltmarshdata` app
+#' - `rtk_seq` RTK sequencing check; `rtk_nonseq` marks potential sequencing errors
 #'
 #' @param path Path to source data
 #' @param plot_file Name of plots file from Salt Marsh Data
 #' @param session_file Name of sessions file from Salt Marsh data
 #' @param rtk_dir Path to directory of RTK CSVs from Emlid
 #' @param get_photos If TRUE, download all photos (checks to see if each exists first)
-#' @param stop_on_error If TRUE, throw an error if there are any bad plot ids or RTK ids
+#' @param plot_radius Radius of plots (m)
 #' @returns List of
 #'    - data = Full dataset
 #'    - z = Summarized data
 #' @importFrom utils read.csv
 #' @importFrom dplyr distinct bind_rows
 #' @importFrom stringi stri_extract_first_regex
-#' @importFrom exifr read_exif
 #' @importFrom lubridate ymd_hms with_tz month day
 #' @importFrom sf st_crs<- st_transform st_as_sf st_coordinates
 #' @export
@@ -40,10 +64,13 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
                       session_file = 'plots/field_sessions.csv',
                       rtk_dir = 'RTK',
                       get_photos = FALSE,
-                      stop_on_error = FALSE) {
+                      plot_radius = 0.7) {
+
 
    message('Processing plots data in ', path, '...')
 
+
+   # Get original RTK, plot, and session data
 
    rtk <- gather_rtk(path = file.path(path, rtk_dir), result = NULL,
                      file.path(path, 'pars', rename_file = 'rtk_names.txt'))        # gather and reproject RTK points from Emlid downloads
@@ -77,33 +104,18 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    plots$rtkid_err <- FALSE
    rtk$rtkid_err <- FALSE
 
-   # ....... and other stuff I'll change
 
 
-   # fix missing plot ids when plot ids were in site_name
-   plotno <- suppressWarnings(as.numeric(plots$plot_id))
-   bad <- !is.na(plotno)                                                   # plot ids that weren't set, and thus were assigned 1, 2, 3, ...
-   fixable <- valid_plotids(plots$site)                                    # some plot ids ended up in site, which is otherwise variable and useless
-   x <- strsplit(plots$site_name[bad & fixable], '-')
-   plots$old_plot_id <- plots$plot_id
-   plots$plot_id[bad & fixable] <- paste(sapply(x, '[[', 1), sapply(x, '[[', 2), sprintf('%03d', plotno[bad & fixable]), sep = '-')
+   plots <- fix_plotid_in_sitename(plots)                                  # fix missing plot ids when plot ids were in site_name
 
-   plots$site <- 'ESX'                                                     # all plots are for site ESX
-
-
-   err <- FALSE                                                            # --- find and report errors ---
-
-   # clean plot ids
    plots$plot_id <- clean_plotids(plots$plot_id)                           # clean up formatting of plot ids, and add section 00 if necessary
-   v <- valid_plotids(plots$plot_id)                                       # valid plot ids
 
-   if(any(!v)) {
-      cat('\nBad plot ids:\nd')
-      print(data.frame(row = 1:nrow(plots), plotid = plots$plot_id, notes = plots$notes)[!v,], quote = FALSE, row.names = FALSE)
-      plots$plotid_err[!v] <- TRUE
-      err <- TRUE
-   }
 
+   # I want to have a fix option, so you can set it to FALSE and check without fixing, or TRUE to fix and then check for remaining errors
+
+
+#---------------- MOVE TO CHECK
+   check_plotids(plots)                                                    # check plot ids, reporting invalid ids
 
 
    # fix identified bad plot ids
@@ -112,61 +124,26 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
    # clean RTK ids
-   plots$rtk_id <- clean_rtkids(plots$rtk_id)                                 # clean up formatting of RTK ids in plots
-   rtk$rtk_id <- clean_rtkids(rtk$rtk_id)                                     # clean up formatting of RTK ids in RTK data
-
-   v <- valid_rtkids(plots$rtk_id)                                            # valid RTK ids in plots data
-   if(any(!v)) {
-      cat('\nBad or missing RTK ids in plot data:\n')
-      print(data.frame(row = 1:nrow(plots), rtk_id = plots$rtk_id, notes = plots$notes)[!v,], quote = FALSE, row.names = FALSE, right = FALSE)
-      plots$rtkid_err[!v] <- TRUE
-      err <- TRUE
-   }
-
-   v2 <- valid_rtkids(rtk$rtk_id)                                             # valid RTK ids in RTK data
-   if(any(!v2)) {
-      cat('\nBad RTK ids in RTK data:\n')
-      print(data.frame(row = 1:nrow(rtk), rtk_id = rtk$rtk_id)[!v2,], quote = FALSE, row.names = FALSE)
-      rtk$rtkid_err[!v2] <- TRUE
-      err <- TRUE
-   }
+   plots$rtk_id <- clean_rtkids(plots$rtk_id)                              # clean up formatting of RTK ids in plots
+   rtk$rtk_id <- clean_rtkids(rtk$rtk_id)                                  # clean up formatting of RTK ids in RTK data
 
 
-   # Now rename duplicated RTK ids according to dedup_rtk.txt
-   dup_rtk <- read.table(file.path(path, 'pars/dedup_rtk.txt'), sep = '\t', header = TRUE, quote = '')
-   rtk <- rtk[order(rtk$date), ]                                              # sort RTKs by date so sequence works out (assumed to be in order in dedup_rtk.txt)
-
-   u <- unique(dup_rtk$rtk_id)
-   for(i in u) {
-      b <- rtk$rtk_id %in% i
-      if(any(b)) {
-         if(sum(b) != sum(dup_rtk$rtk_id %in% i))
-            stop('You have the wrong number of duplicates in dedup_rtk.txt for ', i)
-         rtk$rtk_id[b] <- dup_rtk$new[dup_rtk$rtk_id %in% i]
-      }
-   }
-
-   cat('\nRenamed ', length(u), ' RTK ids in rtk\n', sep = '')
-
-
-   d <- duplicated(rtk$rtk_id)                                                # dup ids in RTK data
-   if(any(d)) {
-      cat('\nDuplicated RTK ids in RTK data: (these should have been fixed in dedup_rtk.txt)\n')
-      d <- rtk$rtk_id %in% rtk$rtk_id[d]
-      print(data.frame(row = 1:nrow(rtk), rtk_id = rtk$rtk_id, old_rtk_id = rtk$old_rtk_id)[d,], quote = FALSE, row.names = FALSE)
-      rtk$rtkid_dup[d] <- TRUE
-      err <- TRUE
-   }
+#-----------        MOVE TO CHECK
+   check_plot_rtkids(plots)                                                # check for valid RTK ids in plots data
+   check_rtk_rtkids(rtk)                                                   # check for valid RTK ids in RTK data
 
 
 
-   if(err & stop_on_error)
-      stop('There were unresolved errors in plot or RTK ids')
+   rtk <- fix_rtkids(rtk, path)                                            # now rename duplicated RTK ids according to dedup_rtk.txt
 
 
 
-   # correct section numbers - LAST CHANGE TO PLOT IDs!
-   plots <- fix_sections(plots, path)
+#-----------        MOVE TO CHECK
+   rtk <- check_rtk_dups(rtk)                                              # check for duplicate RTK ids and flag them
+
+
+
+   plots <- fix_sections(plots, path)                                      # correct section numbers - LAST CHANGE TO PLOT IDs!
 
 
 
@@ -176,32 +153,24 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    plots <- plots[!duplicated(plots$plot_id), ]
 
 
-   # fix errors in percent cover
-   x <- read.table(file.path(path, 'pars/fix_pct_cover.txt'), sep = '\t', header = TRUE, quote = '')
-   key_pc <- paste(pct_cover$plot_id, pct_cover$species_code)
-   key_x <- paste(x$plot_id, x$species_code)
 
-   new <- x[, c('plot_id', 'species_code', 'pct_cover')]
-   new$species <- pct_cover$species[match(new$species_code, pct_cover$species_code)]   # look up names
+   pct_cover <- fix_pctcover(pct_cover, path)                              # fix errors in percent cover according to fix_pct_cover.txt
 
-   pct_cover <- rbind(pct_cover[!key_pc %in% key_x, ], new[, names(pct_cover)])
-   pct_cover <- pct_cover[order(pct_cover$plot_id, pct_cover$species_code), ]
-   rownames(pct_cover) <- NULL
+   check_pct_cover(plots, pct_cover)                                       # check percent cover for out of range errors
+
+
+#-----------        MOVE TO CHECK
+   plots <- check_plot_rtk_dups(plots)                                     # check for duplicated RTK ids in plot data and flag them
 
 
 
-   # Now check for duplicated RTK ids in plot data
-   d <- duplicated(plots$rtk_id)
-   if(any(d)) {
-      cat('\n', sum(d), ' duplicated RTK ids in plot data:\n', sep = '')
-      d <- plots$rtk_id %in% plots$rtk_id[d]
-      print(data.frame(row = 1:nrow(plots), plot_id = plots$plot_id, rtk_id = plots$rtk_id, old_rtk_id = plots$old_rtk_id, notes = plots$notes)[d,], quote = FALSE, row.names = FALSE, right = FALSE)
-      plots$rtkid_dup[d] <- TRUE
-      err <- TRUE
-   }
+
+   ##############
+
 
 
    # clean up plots table some more
+   plots$site <- 'ESX'                                                     # all plots are for site ESX
    plots$site_name <- 'Essex'
    plots$subclass <- as.numeric(stri_extract_first_regex(plots$subclass, '\\d+'))
 
@@ -213,11 +182,10 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    sessions$observers <- gsub('et al', '+', sessions$observers)
    sessions$observers <- toupper(sessions$observers)
 
-
    plots <- merge(plots, sessions[, c('session_id', 'observers')], by = 'session_id', all.y = FALSE)
 
 
-
+   #----------- deal_with_photos
    # rename photos to plot numbers and pull plot date & time from EXIF data
    # photos have been downloaded to photos/downloads; here, we copy them to photos/plots renamed to <plot id>.jpg
 
@@ -237,28 +205,29 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
       message('Error copying ', sum(!e), 'photos')
 
    cat('Reading EXIF data...\n')
-   e <- read_exif(r, , tags = c('DateTimeOriginal', 'GPSLatitude', 'GPSLongitude'))    # get EXIF data from plot photos
+   e <- exifr::read_exif(r, , tags = c('DateTimeOriginal', 'GPSLatitude', 'GPSLongitude'))    # get EXIF data from plot photos
    plots[b, c('photo_date', 'photo_lat', 'photo_long')] <- e[, c('DateTimeOriginal', 'GPSLatitude', 'GPSLongitude')]
    plots$photo_date <- ymd_hms(plots$photo_date, tz = 'America/New_York')                             # fix dumb EXIF date formatting
 
    rtk$date <- ymd_hms(rtk$date, tz = 'UTC') |>
       with_tz('America/New_York')                                # RTK points are labeled as UTC, but are really EDT
+   #-----------
 
 
-
+   #----------- fix_observers
    # correct observers
    fix_obs <- read.table(file.path(path, 'pars/fix_observers.txt'), sep = '\t', header = TRUE, quote = '')
    b <- match(plots$observers, fix_obs$old)
    plots$observers[!is.na(b)] <- fix_obs$new[b[!is.na(b)]]
+   #-----------
 
 
-
+   #----------- fix_species
    # fix incorrect species names in data file (bogus specific for genera)
    sp <- read.table(file.path(path, 'pars/species.txt'), sep = '\t', header = TRUE, quote = '')
    b <- match(pct_cover$species, sp$old)
    pct_cover$species[!is.na(b)] <- sp$new[b[!is.na(b)]]
-
-
+   #-----------
 
 
 
@@ -266,6 +235,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    # dropped gets dropped plots, with drop_confirmd and drop_reason
    # plots gets all plots that were not dropped
 
+   #----------- drop_plots
    drop <- read.table(file.path(path, 'pars/drop_plots.txt'), sep = '\t', header = TRUE, quote = '')
    drop$drop <- TRUE
    plots <- merge(plots, drop, by = 'plot_id', all.x = TRUE)
@@ -275,10 +245,10 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
    cat('\n', nrow(dropped), ' plots dropped; ', nrow(plots), ' remaining. Dropped plots:\n', sep = '')
    print(dropped[, c('plot_id', 'drop_confirmed', 'drop_reason')], row.names = FALSE, right = FALSE)
+   #-----------
 
 
-
-
+   #----------- fix_rtk
    fix_rtk <- read.table(file.path(path, 'pars/fix_rtk.txt'), sep = '\t', header = TRUE, quote = '')
    plots <- merge(plots, fix_rtk, by = 'plot_id', all.x = TRUE)
    plots$fix_rtk_confirmed[is.na(plots$fix_rtk_confirmed)] <- FALSE
@@ -287,17 +257,8 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
    b <- !is.na(plots$new_rtk_id)
    plots$rtk_id[b] <- plots$new_rtk_id[b]
+   #-----------
 
-   # Check again for duplicated RTK ids in plot data
-
-   d <- duplicated(plots$rtk_id)
-   if(any(d)) {
-      cat('\nAfter RTK corrections, ', sum(d), ' duplicated RTK ids in plot data:\n', sep = '')
-      d <- plots$rtk_id %in% plots$rtk_id[d]
-      print(data.frame(row = 1:nrow(plots), plot_id = plots$plot_id, rtk_id = plots$rtk_id, old_rtk_id = plots$old_rtk_id, notes = plots$notes)[d,], quote = FALSE, row.names = FALSE, right = FALSE)
-      plots$rtkid_dup[d] <- TRUE
-      err <- TRUE
-   }
 
 
    # now that RTK ids are cleaned up, join plots to RTK data
@@ -306,6 +267,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
 
+   #----------- fix_plotid_dates
    # look for bad dates in plot ids
    pd <- data.frame(month = ifelse(substr(plots$plot_id, 2, 2) == 'J', 7, 8), day = suppressWarnings(as.numeric(substr(plots$plot_id, 3, 4))))
    ad <- data.frame(month = month(plots$date), day = day(plots$date))
@@ -317,24 +279,23 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
       print(plots$plot_id[b])
       cat('\n')
    }
-
+   #-----------
 
 
    plots <- sort_plots(plots, path)                            # sort plots by date, tablet, section, and plot number
 
 
-   ##  rtk_errors <<- flag_rtk(plots, rtk, path)               # ...try to find RTK errors...in practice, this is worthless
-
-
+   #----------- check_rtk_seq
    # flag out-of-sequence RTK points
    plots <- rtk_sequence(plots)
    cat('\n', sum(plots$rtk_nonseq), ' RTK points seem to be out of sequence, marked by rtk_nonseq:\n', sep = '')
    print(plots[plots$rtk_nonseq, c('plot_id', 'rtk_id')], right = FALSE)
-   rtk_seq <- plots[, c('date', 'plot_id', 'rtk_id', 'rtk_nonseq', 'plotid_err', 'rtkid_err', 'notes')]
+   rtk_seq <- plots[, c('date', 'plot_id', 'rtk_id', 'rtk_nonseq', 'mplotid_err', 'rtkid_err', 'notes')]
    cat('\nSee at global rtk_seq and rtk_seq.txt to resolve these\n')
+   #-----------
 
 
-
+   #----------- process_reviews
    # include review data if available, and drop rejected plots
    f <- file.path(path, 'pars', 'review.txt')
    if(file.exists(f)) {
@@ -369,6 +330,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    plots <- plots[, primary]
 
 
+
    # Results:
    #   plots - primary fields without clutter
    #   auxil - everything else
@@ -384,31 +346,27 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    rtk_seq <<- rtk_seq
 
 
+
+   #----------- write results
    cat('\n\nWriting result files...\n')
 
-
-   # write preliminary shapefiles
-   pathP <- file.path(path, 'prelim')                                                                 # preliminary results path
+   # write GeoPackages
+   pathP <- file.path(path, 'results')                                                                # preliminary results path
 
    q <- st_as_sf(everything, coords = c('easting', 'northing', 'elevation'), crs = 'EPSG:6491+5703')  # 3d GeoPackage of everything
-   st_write(q, file.path(pathP, 'everything.gpkg'), append = FALSE)
+   st_write(q, file.path(pathP, 'everything.gpkg'), append = FALSE, quiet = TRUE)
 
-   q <- st_as_sf(plots, coords = c('easting', 'northing', 'elevation'), crs = 'EPSG:6491+5703')       # 3d GeoPackage of just primary fields
-   st_write(q, file.path(pathP, 'plots.gpkg'), append = FALSE)
-
-
-   everything$date <- as.character(everything$date)                                                   # so shapefile writing doesn't have conniptions
-   everything$tablet_date <- as.character(everything$tablet_date)
-   everything$photo_date <- as.character(everything$photo_date)
-   q <- st_as_sf(everything, coords = c('easting', 'northing'), crs = 'EPSG:6491')                    # 2d shapefile of everything
-   suppressWarnings(st_write(q, file.path(pathP, 'everything.shp'), append = FALSE))
-
-   plots$date <- as.character(plots$date)
-   q <- st_as_sf(plots, coords = c('easting', 'northing'), crs = 'EPSG:6491')                         # 2d shapefile of plots (just the good stuff)
-   suppressWarnings(st_write(q, file.path(pathP, 'plots.shp'), append = FALSE))
+   primary <- st_as_sf(plots, coords = c('easting', 'northing', 'elevation'), crs = 'EPSG:6491+5703') # 3d GeoPackage of just primary fields
+   st_write(primary, file.path(pathP, 'plots.gpkg'), append = FALSE, quiet = TRUE)
 
 
-   # write preliminary tables
+   q <- st_as_sf(plots, coords = c('easting', 'northing'), crs = 'EPSG:6491')                         # 2d GeoPackage of plot circles, just primary fields
+   circles <- st_buffer(primary, plot_radius)
+   st_write(circles, file.path(pathP, 'circles.gpkg'), append = FALSE, quiet = TRUE)
+
+
+
+   # write tables
    tables <- c('plots', 'everything', 'dropped', 'rtk', 'pct_cover', 'sessions', 'auxil', 'rtk_seq')
    for(f in tables)
       write.table(eval(parse(text = f)), file.path(pathP, paste0(f, '.txt')), sep = '\t', row.names = FALSE, quote = FALSE)
@@ -416,18 +374,5 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    message('Preliminary tables and shapefiles written to ', pathP)
 
    message(nrow(plots), ' plots in final dataset')
-
-
-
-
-
-   # fix missing RTK cascades
-   # recover missing subclasses
-   # pull missing GPS from photos ... ?
-
-
-
-
-
 
 }

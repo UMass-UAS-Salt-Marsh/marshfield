@@ -3,10 +3,19 @@
 export(add_overviews)
 export(assign_plots)
 export(avenza_qr)
+export(check_pct_cover)
+export(check_plot_rtk_dups)
+export(check_plot_rtkids)
+export(check_plotids)
+export(check_rtk_dups)
+export(check_rtk_rtkids)
 export(clean_plotids)
 export(clean_rtkids)
 export(dem_check)
+export(fix_pctcover)
+export(fix_plotid_in_sitename)
 export(fix_plots)
+export(fix_rtkids)
 export(fix_sections)
 export(flag_rtk)
 export(format_sections)
@@ -34,9 +43,10 @@ importFrom(bslib,
 importFrom(curl,curl_download)
 importFrom(dplyr,
   bind_rows,
-  distinct
+  distinct,
+  group_by,
+  summarise
 )
-importFrom(exifr,read_exif)
 importFrom(grDevices,
   as.raster,
   col2rgb,
