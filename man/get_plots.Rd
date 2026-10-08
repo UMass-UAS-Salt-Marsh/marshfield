@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_plots.R
 \name{get_plots}
 \alias{get_plots}
-\title{Top-level function to clean up and process field data}
+\title{Top-level function to clean up and process UAS 2026 field data}
 \usage{
 get_plots(
   path = "C:/Work/saltmarsh/data/uas2026/field",
@@ -26,20 +26,14 @@ get_plots(
 
 \item{plot_radius}{Radius of plots (m)}
 }
-\value{
-List of
-\itemize{
-\item data = Full dataset
-\item z = Summarized data
-}
-}
 \description{
-Pulls draft database from UMass UAS 2026 field plots and summarizes subclass counts.
+Some of this code is specific to the dataset, for example, test data are dropped,
+a missing date is added, plot numbers that ended up in the site field are moved.
+Most changes are driven by a number of tab-delimited parameter files that
+specify changs. These were driven by actual errors in this dataset.
 }
 \details{
-Note some ugly hard-coded fixes: test data are dropped, and a missing date is added.
-
-Several parameter files (tab-delimited text) are in pars/. They include
+Parameter files (tab-delimited text) in pars/ include:
 \itemize{
 \item \code{sessions_names.txt} Fields to drop (use \code{-}) or rename in sessions: \code{old}, \code{new}
 \item \code{plots_names.txt} Fields to drop (use \code{-}) or rename in plots: \code{old}, \code{new}
@@ -53,7 +47,7 @@ Full observer names are in observers.txt.
 \item \code{fix_rtk.txt} RTK ids to reassign (usually thanks to off-by-one errors): \code{plot_id},
 \code{new_rtk_id}, \code{fix_rtk_confirmed}, \code{fix_rtk_reason}
 \item \code{dedup_rtk.txt} Drop duplicated RTKs with same rtk_id: \code{rtk_id}, \code{seq}, \code{new}, \code{reason}
-\item \code{species.txt} Change genera incorrectly listed as species by app in percent cover
+\item \code{fix_species.txt} Change genera incorrectly listed as species by app in percent cover
 \item \code{fix_pct_cover.txt} Changes to percent cover fields: \code{plot_id}, \code{species_code}, \code{pct_cover}, \code{reason}
 \item \code{review.txt} Written by \code{view_plots}, used to drop rejected plots. DO NOT EDIT!
 }
@@ -76,4 +70,6 @@ Result tables are written as tab-delimited text to path/results:
 \item \code{sessions} Original session data from \code{saltmarshdata} app
 \item \code{rtk_seq} RTK sequencing check; \code{rtk_nonseq} marks potential sequencing errors
 }
+
+In addition, the tables are saved as global varibles.
 }

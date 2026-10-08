@@ -4,7 +4,7 @@
 \alias{fix_pctcover}
 \title{Fix errors in percent cover}
 \usage{
-fix_pctcover()
+fix_pctcover(pct_cover, path)
 }
 \arguments{
 \item{pct_cover}{Percent cover data frame}

@@ -4,7 +4,7 @@
 \alias{fix_plotid_in_sitename}
 \title{fix missing plot ids when plot ids were in site_name}
 \usage{
-fix_plotid_in_sitename()
+fix_plotid_in_sitename(plots)
 }
 \arguments{
 \item{plots}{Plots data frame}

@@ -5,7 +5,7 @@
 #' @export
 
 
-fix_plotid_in_sitename <- function() {
+fix_plotid_in_sitename <- function(plots) {
 
 
    plotno <- suppressWarnings(as.numeric(plots$plot_id))

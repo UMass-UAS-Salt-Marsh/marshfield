@@ -9,7 +9,7 @@
 #' @export
 
 
-fix_pctcover <- function() {
+fix_pctcover <- function(pct_cover, path) {
 
 
    x <- read.table(file.path(path, 'pars/fix_pct_cover.txt'), sep = '\t', header = TRUE, quote = '')

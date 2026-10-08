@@ -4,7 +4,7 @@
 #' @export
 
 
-check_plotid_dates(plots) {
+check_plotid_dates <- function(plots) {
 
 
    pd <- data.frame(month = ifelse(substr(plots$plot_id, 2, 2) == 'J', 7, 8), day = suppressWarnings(as.numeric(substr(plots$plot_id, 3, 4))))
