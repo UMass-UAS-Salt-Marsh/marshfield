@@ -14,14 +14,14 @@
 
 
 clean_rtkids <- function(x) {
-xxx <<- x
+
 
    y <- strsplit(toupper(x), '-')
    l <- sapply(y, length)
 
-   for(i in 1:length(y))                        # if there's a section number, drop it and include a digit (0) in the RTK id
+   for(i in seq_along(y))                       # if there's a section number, drop it and include a digit (0) in the RTK id if there isn't one
       if(l[i] == 3)
-         y[[i]] <- c(sub('([WXYZ])(\\d{0,1}[JA])', '\\10\\2', y[[i]][[1]]), y[[i]][[3]])
+         y[[i]] <- c(sub('^([WXYZ])([JA])', '\\10\\2', y[[i]][[1]]), y[[i]][[3]])
 
 
    w <- sapply(y, length) == 2                  # we're only going to work with ids that have two elements (after fixing 3)
@@ -29,7 +29,9 @@ xxx <<- x
    y1 <- sapply(y[w], '[[', 1)                  # part 1: RTK unit and date
    y2 <- sapply(y[w], '[[', 2)                  # part 2: point number
 
-   y1 <- paste0(substring(y1, 1, 2), sprintf('%02d', suppressWarnings(as.numeric(substring(y1, 3)))))
+   u <- sub('^([WXYZ]\\d?[JA]).*', '\\1', y1)   # RTK unit (with optional digit) and month
+   d <- sub('^[WXYZ]\\d?[JA]', '', y1)          # day
+   y1 <- paste0(u, sprintf('%02d', suppressWarnings(as.numeric(d))))
    y2 <- sprintf('%03d', suppressWarnings(as.numeric(y2)))
 
    z <- x

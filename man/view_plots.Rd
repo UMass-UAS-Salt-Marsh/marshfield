@@ -26,13 +26,13 @@ and comments) are written to \code{pars/review.txt} every time something changes
 need to save.
 }
 \details{
-Plot data come from \code{prelim/plots.gpkg} and \code{prelim/pct_cover.txt}, photos from
+Plot data come from \code{results/plots.gpkg} and \code{results/pct_cover.txt}, photos from
 \verb{photos/plots/<plot_id>.jpg}, and the list of orthos for each site from \code{pars/orthos.txt}.
 \code{orthos.txt} is a tab-delimited table with columns \code{site}, \code{name} (displayed in the image
 selector), \code{type} (\code{rgb} for orthophotos or \code{dem} for DEMs, which are displayed as shaded
 relief), \code{file} (relative to \code{ortho_path}, or a full path), and optionally \code{vdatum} for DEMs
 (\code{navd88}, the default, or \code{ellipsoidal}, in which case RTK ellipsoidal heights are read
-from \code{prelim/everything.gpkg}). DEM - RTK height at plot center is displayed below the ortho
+from \code{results/everything.gpkg}). DEM - RTK height at plot center is displayed below the ortho
 for each DEM at the site. If \code{plots} doesn't have a
 \code{site} column, all plots are assigned to the first site in \code{orthos.txt}.
 

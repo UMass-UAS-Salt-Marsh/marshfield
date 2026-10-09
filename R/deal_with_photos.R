@@ -22,14 +22,16 @@ deal_with_photos <- function(plots, path) {
 
    cat('\nCopying photos to ', p, '...\n', sep = '')
    r <- file.path(p, paste0(plots$plot_id[b], '.jpg'))
-   e <- file.copy(f, r, recursive = FALSE)
-   if(any(!e))
-      message('Error copying ', sum(!e), 'photos')
+   ok <- file.copy(f, r, recursive = FALSE)
+   if(any(!ok))
+      message('Error copying ', sum(!ok), ' photos')
 
    cat('Reading EXIF data...\n')
-   e <- exifr::read_exif(r, , tags = c('DateTimeOriginal', 'GPSLatitude', 'GPSLongitude'))      # get EXIF data from plot photos
+   e <- exifr::read_exif(r[ok], tags = c('DateTimeOriginal', 'GPSLatitude', 'GPSLongitude')) |>   # get EXIF data from plot photos
+      as.data.frame()
+   i <- match(basename(r), basename(e$SourceFile))                                              # match EXIF rows to plots by file name
    plots[b, c('photo_date', 'photo_lat', 'photo_long')] <-
-      e[, c('DateTimeOriginal', 'GPSLatitude', 'GPSLongitude')]
+      e[i, c('DateTimeOriginal', 'GPSLatitude', 'GPSLongitude')]
    plots$photo_date <- ymd_hms(plots$photo_date, tz = 'America/New_York')                       # fix dumb EXIF date formatting
 
    plots

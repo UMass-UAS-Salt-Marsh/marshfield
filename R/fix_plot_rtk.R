@@ -17,10 +17,10 @@ fix_plot_rtk <- function(plots, path) {
    plots <- merge(plots, fix_rtk, by = 'plot_id', all.x = TRUE)
    plots$fix_rtk_confirmed[is.na(plots$fix_rtk_confirmed)] <- FALSE
    plots$fix_rtk_reason[is.na(plots$fix_rtk_reason)] <- ''
-   plots <- plots[, !names(plots) %in% 'new_rtk_id']
 
    b <- !is.na(plots$new_rtk_id)
    plots$rtk_id[b] <- plots$new_rtk_id[b]
+   plots <- plots[, !names(plots) %in% 'new_rtk_id']
 
    plots
 }

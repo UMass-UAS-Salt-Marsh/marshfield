@@ -37,10 +37,10 @@ positive or negative \code{dz} suggest vertical warping in the DEM. Writes
 }
 \details{
 \itemize{
-\item \verb{prelim/dz_<dem>.gpkg}, a point layer in the plots' CRS (EPSG:6491) with \code{plot_id},
+\item \verb{results/dz_<dem>.gpkg}, a point layer in the plots' CRS (EPSG:6491) with \code{plot_id},
 \code{date}, \code{rtk_id}, \code{section}, \code{subclass}, \code{subclass_name}, \code{rtk_height} (in the DEM's
 vertical datum), \code{dem_height}, and \code{dz}.
-\item \verb{prelim/dz_<dem>.png}, a map of \code{dz} over a faded orthophoto, with section labels.
+\item \verb{results/dz_<dem>.png}, a map of \code{dz} over a faded orthophoto, with section labels.
 }
 
 The DEM and its vertical datum come from \code{pars/orthos.txt} (see \code{view_plots}). Plot centers

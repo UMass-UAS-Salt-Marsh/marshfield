@@ -15,6 +15,7 @@ fix_rtkids <- function(rtk, path) {
    dup_rtk <- read.table(file.path(path, 'pars/dedup_rtk.txt'), sep = '\t', header = TRUE, quote = '')
    rtk <- rtk[order(rtk$date), ]                      # sort RTKs by date so sequence works out (assumed to be in order in dedup_rtk.txt)
 
+   old <- rtk$rtk_id
    u <- unique(dup_rtk$rtk_id)
    for(i in u) {
       b <- rtk$rtk_id %in% i
@@ -25,7 +26,7 @@ fix_rtkids <- function(rtk, path) {
       }
    }
 
-   cat('\nRenamed ', length(u), ' RTK ids in rtk\n', sep = '')
+   cat('\nRenamed ', sum(rtk$rtk_id != old, na.rm = TRUE), ' RTK ids in rtk\n', sep = '')
 
    rtk
 }

@@ -66,7 +66,7 @@ offset_summary <- function(path = 'C:/Work/saltmarsh/data/uas2026/field') {
       return(invisible(x))
    }
 
-   plots <- st_read(file.path(path, 'prelim/plots.gpkg'), quiet = TRUE)
+   plots <- st_read(file.path(path, 'results/plots.gpkg'), quiet = TRUE)
    xy <- st_coordinates(plots)
    i <- match(x$plot_id, plots$plot_id)
    x$easting <- xy[i, 1]

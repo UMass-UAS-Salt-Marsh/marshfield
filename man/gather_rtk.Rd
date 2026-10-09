@@ -6,7 +6,7 @@
 \usage{
 gather_rtk(
   path = "C:/Work/saltmarsh/data/uas2026/field/RTK",
-  result = "C:/Work/saltmarsh/data/uas2026/field/prelim/rtk.gpkg",
+  result = "C:/Work/saltmarsh/data/uas2026/field/results/rtk.gpkg",
   rename_file
 )
 }

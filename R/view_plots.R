@@ -7,13 +7,13 @@
 #' and comments) are written to `pars/review.txt` every time something changes, so there's no
 #' need to save.
 #'
-#' Plot data come from `prelim/plots.gpkg` and `prelim/pct_cover.txt`, photos from
+#' Plot data come from `results/plots.gpkg` and `results/pct_cover.txt`, photos from
 #' `photos/plots/<plot_id>.jpg`, and the list of orthos for each site from `pars/orthos.txt`.
 #' `orthos.txt` is a tab-delimited table with columns `site`, `name` (displayed in the image
 #' selector), `type` (`rgb` for orthophotos or `dem` for DEMs, which are displayed as shaded
 #' relief), `file` (relative to `ortho_path`, or a full path), and optionally `vdatum` for DEMs
 #' (`navd88`, the default, or `ellipsoidal`, in which case RTK ellipsoidal heights are read
-#' from `prelim/everything.gpkg`). DEM - RTK height at plot center is displayed below the ortho
+#' from `results/everything.gpkg`). DEM - RTK height at plot center is displayed below the ortho
 #' for each DEM at the site. If `plots` doesn't have a
 #' `site` column, all plots are assigned to the first site in `orthos.txt`.
 #'
@@ -93,7 +93,7 @@ view_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
                        classes = 'C:/Work/saltmarsh/pars/classes.txt') {
 
 
-   plots <- st_read(file.path(path, 'prelim/plots.gpkg'), quiet = TRUE)
+   plots <- st_read(file.path(path, 'results/plots.gpkg'), quiet = TRUE)
    plot_crs <- st_crs(plots)
    xy <- st_coordinates(plots)
    plots <- st_drop_geometry(plots)
@@ -116,7 +116,7 @@ view_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    if(is.null(plots$site))
       plots$site <- sites[1]
 
-   cover <- read.table(file.path(path, 'prelim/pct_cover.txt'), sep = '\t', header = TRUE, quote = '',
+   cover <- read.table(file.path(path, 'results/pct_cover.txt'), sep = '\t', header = TRUE, quote = '',
                        comment.char = '', na.strings = c('', 'NA'))
 
    photo_dir <- file.path(path, 'photos/plots')
@@ -263,7 +263,7 @@ view_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
          if(is.null(o$dz)) {
             if(orthos$vdatum[match(f, orthos$file)] == 'ellipsoidal') {
                if(is.null(ellipsoidal)) {
-                  e <- st_drop_geometry(st_read(file.path(path, 'prelim/everything.gpkg'), quiet = TRUE))
+                  e <- st_drop_geometry(st_read(file.path(path, 'results/everything.gpkg'), quiet = TRUE))
                   ellipsoidal <<- e$ellipsoidal_height[match(plots$plot_id, e$plot_id)]
                }
                h <- ellipsoidal

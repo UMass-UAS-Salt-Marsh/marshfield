@@ -11,6 +11,5 @@ check_rtk_rtkids <- function(rtk) {
    if(any(!v)) {
       cat('\nBad RTK ids in RTK data:\n')
       print(data.frame(row = 1:nrow(rtk), rtk_id = rtk$rtk_id)[!v,], quote = FALSE, row.names = FALSE)
-      rtk$rtkid_err[!v] <- TRUE
    }
 }

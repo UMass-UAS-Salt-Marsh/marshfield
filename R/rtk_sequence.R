@@ -13,6 +13,8 @@
 #' The first plot in each tablet/day/section is always FALSE. A change in RTK unit/date partway
 #' through a tablet/day/section is TRUE, as is any plot whose RTK point is out of sequence.
 #'
+#' Plots without a valid RTK id are skipped (and are FALSE); they're reported by `check_plot_rtkids`.
+#'
 #' Plots must be sorted in plot id order (see `sort_plots`).
 #'
 #' @param plots Plots data frame, sorted by `plot_id`
@@ -22,6 +24,10 @@
 
 rtk_sequence <- function(plots) {
 
+
+   ok <- valid_rtkids(plots$rtk_id)             # skip plots without a valid RTK id
+   all_plots <- plots
+   plots <- plots[ok, ]
 
    y <- strsplit(toupper(plots$plot_id), '-')
    y1 <- sapply(y, '[[', 1)                     # part 1: tablet and date
@@ -52,6 +58,7 @@ rtk_sequence <- function(plots) {
          offset[i] <- min(rn[s]) - min(pn[s])
    }
 
-   plots$rtk_nonseq <- !new & (new_rtk | (rn - pn) != offset[seg])
-   plots
+   all_plots$rtk_nonseq <- FALSE
+   all_plots$rtk_nonseq[ok] <- !new & (new_rtk | (rn - pn) != offset[seg])
+   all_plots
 }

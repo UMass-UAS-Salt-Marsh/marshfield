@@ -4,10 +4,10 @@
 #' is expected where the DEM includes vegetation; spatially coherent patches of large
 #' positive or negative `dz` suggest vertical warping in the DEM. Writes
 #'
-#' - `prelim/dz_<dem>.gpkg`, a point layer in the plots' CRS (EPSG:6491) with `plot_id`,
+#' - `results/dz_<dem>.gpkg`, a point layer in the plots' CRS (EPSG:6491) with `plot_id`,
 #'   `date`, `rtk_id`, `section`, `subclass`, `subclass_name`, `rtk_height` (in the DEM's
 #'   vertical datum), `dem_height`, and `dz`.
-#' - `prelim/dz_<dem>.png`, a map of `dz` over a faded orthophoto, with section labels.
+#' - `results/dz_<dem>.png`, a map of `dz` over a faded orthophoto, with section labels.
 #'
 #' The DEM and its vertical datum come from `pars/orthos.txt` (see `view_plots`). Plot centers
 #' are put into the DEM's CRS as in `view_plots` (including the TEMPORARY datum shift).
@@ -51,12 +51,12 @@ dem_check <- function(dem, basemap = NULL, limit = 1.2,
 
 
    # plots and RTK heights in the DEM's vertical datum
-   p <- st_read(file.path(path, 'prelim/plots.gpkg'), quiet = TRUE)
+   p <- st_read(file.path(path, 'results/plots.gpkg'), quiet = TRUE)
    plot_crs <- st_crs(p)
    xyz <- st_coordinates(p)
    p <- st_drop_geometry(p)
    if(orthos$vdatum[k] == 'ellipsoidal') {
-      e <- st_drop_geometry(st_read(file.path(path, 'prelim/everything.gpkg'), quiet = TRUE))
+      e <- st_drop_geometry(st_read(file.path(path, 'results/everything.gpkg'), quiet = TRUE))
       p$rtk_height <- e$ellipsoidal_height[match(p$plot_id, e$plot_id)]
    }
    else
@@ -74,7 +74,7 @@ dem_check <- function(dem, basemap = NULL, limit = 1.2,
    out <- st_as_sf(cbind(p[, c('plot_id', 'date', 'rtk_id', 'section', 'subclass', 'subclass_name',
                                'rtk_height', 'dem_height', 'dz')], x = xyz[, 1], y = xyz[, 2]),
                    coords = c('x', 'y'), crs = 'EPSG:6491')
-   base <- file.path(path, 'prelim', paste0('dz_', sub('\\.tif$', '', basename(orthos$file[k]))))
+   base <- file.path(path, 'results', paste0('dz_', sub('\\.tif$', '', basename(orthos$file[k]))))
    st_write(out, paste0(base, '.gpkg'), append = FALSE, quiet = TRUE)
 
 

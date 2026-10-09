@@ -12,7 +12,7 @@ rename_cols <- function(x, file) {
 
 
    p <- read.table(file, sep = '\t', header = TRUE)
-   x <- x[, p$new != '-']           # drop columns we don't like
+   x <- x[, !names(x) %in% p$old[p$new == '-']]           # drop columns we don't like
    p <- p[!p$new %in% c('', '-'), ]
 
    i <- match(p$old, names(x))

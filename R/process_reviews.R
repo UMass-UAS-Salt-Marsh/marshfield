@@ -33,6 +33,8 @@ process_reviews <- function(plots, dropped, path) {
 
       plots <- plots[!r, !names(plots) %in% 'rejected']
    }
+   else
+      plots[c('reviewed', 'problems', 'split', 'coverr', 'comments')] <- NA
 
    list(plots = plots, dropped = dropped)
 }
