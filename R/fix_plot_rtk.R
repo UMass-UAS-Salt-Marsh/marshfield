@@ -1,4 +1,4 @@
-#' Correct bad RTKs in plots from parameter files
+#' Correct bad RTKs in plots from parameter file
 #'
 #' Parameter file:
 #' - `fix_rtk.txt` RTK ids to reassign (usually thanks to off-by-one errors): `plot_id`,

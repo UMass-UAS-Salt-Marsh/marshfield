@@ -1,4 +1,4 @@
-#' fix missing plot ids when plot ids were in site_name
+#' Fix missing plot ids when plot ids were in site_name
 #'
 #' @param plots Plots data frame
 #' @returns Plots data frame

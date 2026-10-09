@@ -1,4 +1,4 @@
-#' Check for wroong dates in plot ids
+#' Check for wrong dates in plot ids
 #'
 #' @param plots Plots data frame
 #' @export
