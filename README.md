@@ -7,17 +7,17 @@ Companion package to [marshmap](https://github.com/UMass-UAS-Salt-Marsh/marshmap
 
 ## Functions to prepare for field season
 
-- tides - Summarize NOAA tide predictions for field work planning
-- make_site - Make final site shapefile from draft shapefile
-- assign_plots - Assign number of plots to a polygon shapefile
-- format_sections - Format sections shapefile for Avenza
-- shapefiles_to_gpkg - Package shapefiles to a gpkg for Avenza
-- orthos_to_tiff - Process MassGIS 2025 orthos into a geoTIFF for Avenza
-- avenza_qr - Make QR codes for downloading map files in Avenza
+- `tides` Summarize NOAA tide predictions for field work planning
+- `make_site` Make final site shapefile from draft shapefile
+- `assign_plots` Assign number of plots to a polygon shapefile
+- `format_sections` Format sections shapefile for Avenza
+- `shapefiles_to_gpkg` Package shapefiles to a gpkg for Avenza
+- `orthos_to_tiff` Process MassGIS 2025 orthos into a geoTIFF for Avenza
+- `avenza_qr` Make QR codes for downloading map files in Avenza
 
 ## Functions to summarize data during field season
 
-- subclass_freq - Summzarize subclass frequency for within-field season updates
+- `subclass_freq` Summzarize subclass frequency for within-field season updates
 
 ## Functions to process field data
 
@@ -43,7 +43,7 @@ Companion package to [marshmap](https://github.com/UMass-UAS-Salt-Marsh/marshmap
 - `fix_species` Fix incorrect species names in data file (bogus specific for genera)
 - `gather_rtk` Gather RTK GPS points for UMass UAS 2026
 - `get_photos` Download plot photos from the server
-- `get_plots` - Top-level function to clean up and process field data
+- `get_plots` Top-level function to clean up and process field data
 - `process_reviews` If review data are available, drop rejected plots
 - `rename_cols` Rename and delete columns in data frame from parameter file
 - `rename_cols` Rename and delete columns in data frame from parameter file
@@ -70,7 +70,7 @@ Companion package to [marshmap](https://github.com/UMass-UAS-Salt-Marsh/marshmap
 - `fix_plots.txt` Fix bad plot ids: `old`, `new`, `fix_plots_reason`
 - `drop_plots.txt` Plots to drop: `plot_id`, `drop_confirmed`, and `drop_reason`
 - `fix_observers.txt` Fix errors and inconsistencies in observers: `old`, `new`, `reason`.
- Full observer names are in observers.txt.
+   Full observer names are in observers.txt.
 - `fix_sections.txt` Split field days into sections: `start`, `end`, `is_section`, `reason`
 
 - `fix_rtk.txt` RTK ids to reassign (usually thanks to off-by-one errors): `plot_id`,

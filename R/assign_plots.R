@@ -19,9 +19,6 @@ assign_plots <- function(shp = 'C:/Work/saltmarsh/data/uas2026/result/sections.s
    x$proportion <- (x$section != 0) * x$acres * nplots / sum(x$acres[x$section != 0])  # diagnostics
    z <- as.data.frame(x)
 
-   zzz <<- z[order(z$section),]
-
-
    st_write(x, shp, append = FALSE)
    message(nrow(x), ' sections (', round(sum(x$acres)), ' total acres), ', sum(x$section != 0),
            ' visitable sections (', round(sum(x$acres[x$section != 0])), ' acres), ', sum(x$plots), ' total plots')
