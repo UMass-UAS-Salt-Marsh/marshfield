@@ -186,6 +186,10 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    check_pct_cover(plots, pct_cover)                                       # check percent cover for out of range errors
 
 
+   cat('\n-----\n\n')
+   subclasses(plots)                                                       # print table of frequency counts by subclass
+
+
    cat('\n\nWriting result files...\n')                                    #----------- write results
    pathR <- file.path(path, 'results')                                     # results path
    if(!dir.exists(pathR))                                                  # make sure result directory exists

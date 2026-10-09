@@ -51,6 +51,7 @@ Companion package to [marshmap](https://github.com/UMass-UAS-Salt-Marsh/marshmap
 - `rtk_sequence` Check for agreement in plot id and RTK id sequences
 - `sort_plots` Sort plots in canonical order
 - `sort_plots` Sort plots in canonical order
+- `subclasses` Print frequency table of subclasses
 - `valid_plotids` Return TRUE for fields where the plot_id is valid for UMass UAS 2026
 - `valid_rtkids` Return TRUE for fields where the RTK id is valid for UMass UAS 2026
 
