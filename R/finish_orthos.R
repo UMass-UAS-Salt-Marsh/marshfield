@@ -41,8 +41,8 @@
 #' @export
 
 
-finish_orthos <- function(files, site,
-                          base_path = 'U:/projects/uas_veg/sites/<site>/ortho',
+finish_orthos <- function(files, site = '<site>',
+                          base_path = 'U:/projects/uas_veg/sites/<site>',
                           source_path = 'orthos_raw',
                           result_path = 'orthos',
                           nodata = 65535,

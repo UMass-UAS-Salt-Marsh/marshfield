@@ -1,11 +1,11 @@
-A grab-bag package for planning a vegetation sampling field season for
+A grab-bag package for planning and excuting a vegetation sampling field season for
 the UMass UAS project (specifically, UMass UAS 2026), including formatting tide
 tables, preparing a site shapefile, preparing maps for Avenza, summarizing field
 samples on the fly, and processing collected data.
 
 Companion package to [marshmap](https://github.com/UMass-UAS-Salt-Marsh/marshmap).
 
-## Functions to prepare for field season
+## Preparing for field season
 
 - `tides` Summarize NOAA tide predictions for field work planning
 - `make_site` Make final site shapefile from draft shapefile
@@ -15,11 +15,11 @@ Companion package to [marshmap](https://github.com/UMass-UAS-Salt-Marsh/marshmap
 - `orthos_to_tiff` Process MassGIS 2025 orthos into a geoTIFF for Avenza
 - `avenza_qr` Make QR codes for downloading map files in Avenza
 
-## Functions to summarize data during field season
+## Summaring data during field season
 
 - `subclass_freq` Summzarize subclass frequency for within-field season updates
 
-## Functions to process field data
+## Processing field data
 
 - `check_pct_cover` Check percent cover for out-of-range values
 - `check_plot_rtk_dups` Check for duplicated RTK ids in plot data and flag them
@@ -82,3 +82,33 @@ Companion package to [marshmap](https://github.com/UMass-UAS-Salt-Marsh/marshmap
 - `fix_pct_cover.txt` Changes to percent cover fields: `plot_id`, `species_code`, `pct_cover`, `reason`
 
 - `review.txt` Written by `view_plots`, used to drop rejected plots. DO NOT EDIT!
+
+## Post-processing orthophotos
+
+- `finish_orthos` Finish orthophotos after a Metashape run: compressing/set nodata/statistics/overviews
+
+Use this function after an Agrisoft Metashape run to finalize orthophotos. From R, load the library with
+
+```
+devtools::install_github("\UMass-UAS-Salt-Marsh/marshfield")   # already done on marsh01 and marsh02
+library(marshfield)
+```
+
+Call `finish_orthos` like this
+
+```
+finish_orthos(c('esx_2026_08_07_mid_micap_ortho.tif', 'esx_2026_08_14_high_micap_ortho.tif', 
+   'esx_2026_08_21_mid_micap_ortho.tif'), site = 'ESX')
+```
+This will process three orthophotos in `U:/projects/uas_veg/sites/ESX/orthos_raw` (the default
+project is `uas_veg`), writing them to `U:/projects/uas_veg/sites/ESX/orthos`. By default, the 
+files are compressed, nodata is set to 65535, statistics are calculated, and overviews are built.
+By default, raw orthophotos are in `orthos_raw`, and are written as final versions to `orthos` in
+the base and site directory. See `help(finish_orthos)` for details.
+
+Another example, for the crab project, this time without overviews:
+
+```
+finish_orthos(c('wel_2026_08_26_mid_micap_130ft_ortho.tif', 'wel_2026_08_26_mid_micap_100ft_ortho.tif'), 
+site = 'WEL', base_path = 'U:/projects/uas_crab/<site>', overviews = FALSE)
+```
