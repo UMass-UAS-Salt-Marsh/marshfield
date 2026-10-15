@@ -25,6 +25,13 @@
 #' (The result path is created if it doesn't exist). The default is set up for the `uas_veg`
 #' project; for other projects, you'll need to specify `base_path`.
 #'
+#' Before processing, all source files are checked, and the function stops if any are missing.
+#' Then any existing files in the result directory that share a base name with the files being
+#' processed (e.g., `<file>.tif`, `<file>.tif.ovr`, `<file>.tif.aux.xml`) are deleted, so stale
+#' sidecars from a previous run don't linger. If `in_place = TRUE`, only the sidecars are deleted.
+#' If any of these files are locked (for instance, open in ArcGIS), the function stops before
+#' deleting or processing anything.
+#'
 #' @param files Vector of geoTIFF file names
 #' @param site Optional site abbreviation, inserted in place of `<site>` in paths and filenames
 #' @param base_path Optional base path, shared between source and result paths (use
@@ -37,7 +44,7 @@
 #' @param overviews If TRUE, create overviews in sidecar `*.tif.ovr`
 #' @param in_place If TRUE, files are procssed in place and not copied. Only available if `compress = FALSE`.
 #' @importFrom sf gdal_addo gdal_utils
-#' @importFrom terra nlyr
+#' @importFrom terra nlyr rast crs writeRaster
 #' @export
 
 
@@ -68,11 +75,26 @@ finish_orthos <- function(files, site = '<site>',
 
 
 
-   if(in_place & compress)
+   same_base <- function(f) {                                                 # helper: existing files sharing base name with f
+      base <- sub('\\.[^.]*$', '', basename(f))
+      x <- list.files(dirname(f))
+      file.path(dirname(f), x[x == base | startsWith(x, paste0(base, '.'))])
+   }
+
+
+   is_locked <- function(x) {                                                 # helper: TRUE if file is locked (e.g., by ArcGIS)
+      tmp <- paste0(x, '.locktest')
+      if(!suppressWarnings(file.rename(x, tmp)))
+         return(TRUE)
+      file.rename(tmp, x)
+      FALSE
+   }
+
+
+
+   if(in_place && compress)
       stop('You may not use in_place = TRUE with compress = TRUE, as compression requires creating a new file')
 
-
-   message('Processing ', length(files), ' orthophotos...')
 
    f <- filenames(files, site, base_path, source_path)                        # source path and filenames
    if(in_place)
@@ -81,29 +103,55 @@ finish_orthos <- function(files, site = '<site>',
       g <- filenames(files, site, base_path, result_path)                     # result path and filenames
 
 
+   missing <- f[!file.exists(f)]                                              # check for missing source files
+   if(length(missing) > 0)
+      stop('Missing source file(s):\n   ', paste(missing, collapse = '\n   '))
+
+   if(!in_place && any(normalizePath(dirname(f)) == normalizePath(dirname(g), mustWork = FALSE)))
+      stop('Source and result paths are the same; use in_place = TRUE to process files in place')
+
+
+   old <- unique(unlist(lapply(g, same_base)))                                # existing results (or sidecars if in place) to delete
+   if(in_place)
+      old <- setdiff(old, f)
+   locked <- old[vapply(old, is_locked, logical(1))]
+   if(length(locked) > 0)
+      stop('These files are locked (are they open in ArcGIS?):\n   ', paste(locked, collapse = '\n   '))
+   if(length(old) > 0) {
+      message('Deleting ', length(old), ' existing result file(s)')
+      file.remove(old)
+   }
+
+   dir.create(unique(dirname(g)), recursive = TRUE, showWarnings = FALSE)
+
+
+   message('Processing ', length(files), ' orthophotos...')
+
    for(i in seq_along(f)) {                                                   # for each ortho,
       message('Processing ', f[i], '...')
-      c <- crs(rast(f[i]), describe = TRUE)
-      message('   CRS = ', paste0(c$authority, ':', c$code))
+      r <- rast(f[i])
+      cr <- crs(r, describe = TRUE)
+      message('   CRS = ', paste0(cr$authority, ':', cr$code))
 
-      if(compress) {                                                          #    1. compression
-         writeRaster(rast(f[i]), g[i], datatype = "INT2U", NAflag = 65535,
+      if(compress)                                                            #    1. compression
+         writeRaster(r, g[i], datatype = "INT2U", NAflag = if(isFALSE(nodata)) NA else nodata,
                      gdal = c("COMPRESS=ZSTD", "PREDICTOR=2", "TILED=YES", "BIGTIFF=IF_SAFER"))
-      }
+      else if(!in_place)
+         file.copy(f[i], g[i])
 
-      if(nodata != FALSE)                                                     #    2. NoData
+      if(!isFALSE(nodata))                                                    #    2. NoData
          write_nodata_aux(g[i], nodata)
 
-      if(overviews)                                                           #    3. Overviews
+      if(stats)                                                               #    3. Statistics
+         gdal_utils("info", g[i], options = c("-stats", "-hist"), quiet = TRUE)
+
+      if(overviews)                                                           #    4. Overviews
          gdal_addo(g[i],
                    overviews = c(2, 4, 8, 16, 32),
                    method = "AVERAGE",
                    read_only = TRUE,
                    config_options = c(COMPRESS_OVERVIEW = "DEFLATE",
                                       BIGTIFF_OVERVIEW = "IF_SAFER"))
-
-      if(stats)                                                               #    4. Statistics
-         gdal_utils("info", g[i], options = c("-stats", "-hist"), quiet = TRUE)
    }
 
    message('Finished processing ', length(files), ' files')

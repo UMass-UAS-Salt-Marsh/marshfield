@@ -67,4 +67,11 @@ Only run this for 2-byte integer files (INT2U). This should work for all orthoph
 Files are copied from <base_path>/<source_path>/\if{html}{\out{<file>}} to <base_path>/<result_path>/\if{html}{\out{<file>}}.
 (The result path is created if it doesn't exist). The default is set up for the \code{uas_veg}
 project; for other projects, you'll need to specify \code{base_path}.
+
+Before processing, all source files are checked, and the function stops if any are missing.
+Then any existing files in the result directory that share a base name with the files being
+processed (e.g., \verb{<file>.tif}, \verb{<file>.tif.ovr}, \verb{<file>.tif.aux.xml}) are deleted, so stale
+sidecars from a previous run don't linger. If \code{in_place = TRUE}, only the sidecars are deleted.
+If any of these files are locked (for instance, open in ArcGIS), the function stops before
+deleting or processing anything.
 }
