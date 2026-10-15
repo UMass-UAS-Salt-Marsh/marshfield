@@ -83,7 +83,8 @@ finish_orthos <- function(files, site = '<site>',
 
    for(i in seq_along(f)) {                                                   # for each ortho,
       message('Processing ', f[i], '...')
-      message('   CRS = ', crs(rast(f[i])))
+      c <- crs(rast(f[i]), describe = TRUE)
+      message('   CRS = ', paste0(c$authority, ':', c$code))
 
       if(compress) {                                                          #    1. compression
          writeRaster(rast(f[i]), g[i], datatype = "INT2U", NAflag = 65535,
