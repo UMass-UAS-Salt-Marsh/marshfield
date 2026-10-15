@@ -36,7 +36,7 @@ gather_rtk <- function(path = 'C:/Work/saltmarsh/data/uas2026/field/RTK',
    z <- rename_cols(z, rename_file)          # rename columns and drop junk
 
 
-   y <- reproj_rtk(z, validate)              # reproject and validate RTK points
+   y <- reproj_rtk(z, validate = validate)            # reproject and validate RTK points
 
    q <- st_as_sf(y, coords = c('easting', 'northing', 'elevation'), crs = 'EPSG:6491+5703')
 
