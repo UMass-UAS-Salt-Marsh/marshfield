@@ -7,6 +7,7 @@
 #' @param path Path to folder of RTK files (.CSVs with nothing else in folder)
 #' @param result Path and filename of preliminary result file; use NULL to skip writing it
 #' @param rename_file Path and filename to specify column renaming and dropping
+#' @param validate Require correctly-configured plots to check against
 #' @returns Data frame of RTK points with all info
 #' @importFrom utils read.csv
 #' @export
@@ -14,7 +15,7 @@
 
 gather_rtk <- function(path = 'C:/Work/saltmarsh/data/uas2026/field/RTK',
                        result = 'C:/Work/saltmarsh/data/uas2026/field/results/rtk.gpkg',
-                       rename_file) {
+                       rename_file, validate = TRUE) {
 
 
    x <- list.files(path)
@@ -35,7 +36,7 @@ gather_rtk <- function(path = 'C:/Work/saltmarsh/data/uas2026/field/RTK',
    z <- rename_cols(z, rename_file)          # rename columns and drop junk
 
 
-   y <- reproj_rtk(z)      # reproject and validate RTK points
+   y <- reproj_rtk(z, validate)              # reproject and validate RTK points
 
    q <- st_as_sf(y, coords = c('easting', 'northing', 'elevation'), crs = 'EPSG:6491+5703')
 
