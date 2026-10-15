@@ -90,7 +90,7 @@ Companion package to [marshmap](https://github.com/UMass-UAS-Salt-Marsh/marshmap
 Use this function after an Agrisoft Metashape run to finalize orthophotos. From R, load the library with
 
 ```
-devtools::install_github("\UMass-UAS-Salt-Marsh/marshfield")   # already done on marsh01 and marsh02
+devtools::install_github("UMass-UAS-Salt-Marsh/marshfield")   # already done on marsh01 and marsh02
 library(marshfield)
 ```
 
