@@ -7,7 +7,8 @@
 gather_rtk(
   path = "C:/Work/saltmarsh/data/uas2026/field/RTK",
   result = "C:/Work/saltmarsh/data/uas2026/field/results/rtk.gpkg",
-  rename_file
+  rename_file,
+  validate = TRUE
 )
 }
 \arguments{
@@ -16,6 +17,8 @@ gather_rtk(
 \item{result}{Path and filename of preliminary result file; use NULL to skip writing it}
 
 \item{rename_file}{Path and filename to specify column renaming and dropping}
+
+\item{validate}{Require correctly-configured plots to check against}
 }
 \value{
 Data frame of RTK points with all info
