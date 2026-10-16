@@ -7,10 +7,10 @@ Companion package to [marshmap](https://github.com/UMass-UAS-Salt-Marsh/marshmap
 
 ## Loading the library
 
-If the package isn't installed on your computer (ski this on MassMarsh servers):
+If the package isn't installed on your computer (skip this on MassMarsh servers):
 
 ```
-devtools::install_github("UMass-UAS-Salt-Marsh/marshfield")
+devtools::install_github('UMass-UAS-Salt-Marsh/marshfield')
 ```
 
 Then load the library:
