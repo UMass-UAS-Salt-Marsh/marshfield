@@ -36,7 +36,7 @@ PIPE_2018 <- paste0(
 reproj_rtk <- function(x, pipeline = PIPE_2018, tol_mm = 2, validate = TRUE) {
 
 
-   target_h <- 'EPSG:6491'                      # NAD83(2011) / MA Mainland, metres
+   target_h <- 'EPSG:6491'                      # NAD83(2011) / MA Mainland, meters
    target   <- 'EPSG:6491+5703'                 # ... + NAVD88 height
    good_cs  <- 'NAD83(2011) / Massachusetts Mainland + NAVD88(GEOID18) height'
    src_3d   <- 'EPSG:6319'                      # NAD83(2011) geographic 3D
@@ -58,7 +58,7 @@ reproj_rtk <- function(x, pipeline = PIPE_2018, tol_mm = 2, validate = TRUE) {
 
    nm <- st_crs(target_h)$Name
    if (grepl('ft', nm, ignore.case = TRUE) | !identical(st_crs(target_h)$units, 'm'))
-      stop('Target CRS is not in metres: ', nm)
+      stop('Target CRS is not in meters: ', nm)
 
    sf_proj_network(enable = TRUE)               # allow CDN fetch of the GEOID18 grid
 

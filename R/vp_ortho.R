@@ -1,15 +1,16 @@
 #' Load an ortho or DEM for view_plots
 #'
 #' For RGB orthos, picks the Red, Green, and Blue bands (or the first 3 bands if they aren't
-#' named) and computes a fixed, linked 1-99% stretch from a regular sample of the whole image,
-#' so colors are consistent from plot to plot. 65535 is treated as nodata (as in MicaSense
-#' orthos).
+#' named) and computes a fixed, linked 1-99% stretch for the whole image, so colors are
+#' consistent from plot to plot. 65535 is treated as nodata (as in MicaSense orthos).
+#'
+#' The stretch comes from the statistics `finish_orthos` writes, which is instant; see
+#' `ortho_stretch` for the fallback when an ortho hasn't been through it.
 #'
 #' @param file Path to geoTIFF
 #' @param type Either 'rgb' or 'dem'
 #' @returns List of rast, type, and for rgb, lo and hi (stretch limits for each band)
-#' @importFrom terra rast spatSample
-#' @importFrom stats quantile complete.cases
+#' @importFrom terra rast
 #' @keywords internal
 #' @noRd
 
@@ -25,13 +26,11 @@ vp_load_ortho <- function(file, type) {
       bands <- 1:3
    r <- r[[bands]]
 
-   s <- spatSample(r, 20000, method = 'regular', as.df = TRUE)                  # sample for stretch (uses overviews, so it's fast)
-   s[s == 65535] <- NA
-   s <- s[complete.cases(s), ]
+   s <- ortho_stretch(r)
 
    list(rast = r, type = type,                                                   # linked stretch (same for all bands) keeps colors natural
-        lo = rep(min(sapply(s, quantile, 0.01)), 3),
-        hi = rep(max(sapply(s, quantile, 0.99)), 3))
+        lo = rep(min(s$lo), 3),
+        hi = rep(max(s$hi), 3))
 }
 
 
@@ -105,7 +104,8 @@ vp_render_ortho <- function(o, x, y, width, file, px = 800, radius = 0.7, offset
    text(sx + sb / 2, sy, paste0(sb, ' m'), pos = 3, col = 'white', cex = 2, font = 2)
 
    if(o$type == 'dem')
-      text(xlim[2] - width * 0.03, sy, sprintf('%.2f to %.2f m', z$range[1], z$range[2]),
+      text(xlim[2] - width * 0.03, sy,
+           if(any(is.na(z$range))) 'no data' else sprintf('%.2f to %.2f m', z$range[1], z$range[2]),
            adj = c(1, 0.5), col = 'white', cex = 2, font = 2)
 }
 
@@ -146,7 +146,12 @@ vp_dem_colors <- function(cr) {
                angle = 45, direction = 315)
    z <- as.matrix(cr, wide = TRUE)
    h <- as.matrix(hs, wide = TRUE)
-   h <- h / max(h, na.rm = TRUE)
+
+   if(all(is.na(z)))                                                             # clip is entirely nodata: nothing to shade
+      return(list(ras = as.raster(matrix(NA_character_, nrow(z), ncol(z))), range = c(NA_real_, NA_real_)))
+
+   hmax <- suppressWarnings(max(h, na.rm = TRUE))                                # all-NA hillshade gives -Inf, not an error
+   h <- if(is.finite(hmax) && hmax > 0) h / hmax else h * NA
    h[is.na(h)] <- 1
 
    q <- quantile(z, c(0.02, 0.98), na.rm = TRUE)

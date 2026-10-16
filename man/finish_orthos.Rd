@@ -7,9 +7,10 @@
 finish_orthos(
   files,
   site = "<site>",
+  type = "orthos",
   base_path = "U:/projects/uas_veg/sites/<site>",
-  source_path = "orthos_raw",
-  result_path = "orthos",
+  source_postfix = "_raw",
+  result_postfix = "",
   nodata = 65535,
   stats = TRUE,
   overviews = TRUE,
@@ -22,14 +23,20 @@ finish_orthos(
 
 \item{site}{Optional site abbreviation, inserted in place of \verb{<site>} in paths and filenames}
 
+\item{type}{Type of files, such as \code{orthos}, \code{dem}, or \code{dtm}. Used as the source and result
+directory names, with the postfixes below, and inserted in place of \verb{<type>} in paths}
+
 \item{base_path}{Optional base path, shared between source and result paths (use
 \code{base_path = ''} to skip a base path)}
 
-\item{source_path}{source path, appended to base_path if present}
+\item{source_postfix}{Appended to \code{type} to give the source directory (so \code{orthos} and
+\verb{_raw} give \code{orthos_raw})}
 
-\item{result_path}{result path, appended to base_path if present}
+\item{result_postfix}{Appended to \code{type} to give the result directory (empty, by default,
+so results land in \verb{<type>} itself)}
 
-\item{nodata}{Value to use for nodata, or FALSE to skip this step}
+\item{nodata}{Value to use for nodata, or FALSE to use NA. Ignored for floating-point
+files, which always get NA}
 
 \item{stats}{If TRUE, create statistics files in sidecar \verb{*.tif.aux.xml}}
 
@@ -41,7 +48,7 @@ finish_orthos(
 }
 \description{
 Performs standard post-processing for orthophotos created by Agisoft Metashape. Files are
-copied from a source directory (by default, \verb{ortho_raw/}) to a result directory (\verb{ortho/})
+copied from a source directory (by default, \verb{orthos_raw/}) to a result directory (\verb{orthos/})
 using a lossless compression algorithm that should reduce the file size by about a third,
 and setting the nodata value, adding statistics, and building overviews (also known as
 pyramids). The result files will be quick to load and view in ArcGIS Pro or QGIS, as
@@ -62,11 +69,26 @@ Overviews and statistics are created as sidecar files, \verb{*.tif.ovr}
 and \verb{*.tif.aux.xml}, so you can take them or leave them. If base files
 are updated, you'll need to rerun this.
 
-Only run this for 2-byte integer files (INT2U). This should work for all orthophotos.
+Each file keeps its own data type. That matters: orthophotos are 2-byte unsigned integers
+(INT2U), but DEMs and DTMs are floating point, and writing one as INT2U truncates every
+elevation to a whole number and clamps the negatives to zero, which destroys the file.
 
-Files are copied from <base_path>/<source_path>/\if{html}{\out{<file>}} to <base_path>/<result_path>/\if{html}{\out{<file>}}.
-(The result path is created if it doesn't exist). The default is set up for the \code{uas_veg}
-project; for other projects, you'll need to specify \code{base_path}.
+\code{nodata} defaults to 65535, which is right for MicaSense orthophotos. A sentinel value like
+that only makes sense for integer data -- in a floating-point file 65535 is simply a real
+elevation, and nodata is NaN -- so NA is used for floating-point files whatever \code{nodata}
+says, and a note is printed. For integer files, a \code{nodata} the type can't hold is refused
+rather than silently written as something else. \code{nodata = FALSE} uses NA throughout.
+
+Files are copied from \verb{<base_path>/<type><source_postfix>/<file>} to
+\verb{<base_path>/<type><result_postfix>/<file>}. (The result path is created if it doesn't
+exist). The default is set up for the \code{uas_veg} project; for other projects, you'll need to
+specify \code{base_path}.
+
+\code{type} is what makes this usable for more than orthophotos: with the default postfixes,
+\code{type = 'orthos'} goes from \verb{orthos_raw/} to \verb{orthos/}, and \code{type = 'dem'} from \verb{dem_raw/}
+to \verb{dem/}. Statistics matter beyond ArcGIS and QGIS, as \code{gcp} and \code{view_plots} read their
+display stretch from them rather than sampling the raster, which is the difference between
+an image opening instantly and taking the better part of a minute over the network.
 
 Before processing, all source files are checked, and the function stops if any are missing.
 Then any existing files in the result directory that share a base name with the files being

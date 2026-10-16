@@ -2,8 +2,9 @@
 #'
 #' Samples a DEM at each plot center and computes `dz` = DEM - RTK height (m). Positive `dz`
 #' is expected where the DEM includes vegetation; spatially coherent patches of large
-#' positive or negative `dz` suggest vertical warping in the DEM. Writes
+#' positive or negative `dz` suggest vertical warping in the DEM.
 #'
+#' Writes
 #' - `results/dz_<dem>.gpkg`, a point layer in the plots' CRS (EPSG:6491) with `plot_id`,
 #'   `date`, `rtk_id`, `section`, `subclass`, `subclass_name`, `rtk_height` (in the DEM's
 #'   vertical datum), `dem_height`, and `dz`.
@@ -67,7 +68,7 @@ dem_check <- function(dem, basemap = NULL, limit = 1.2,
 
    # sample DEM
    r <- rast(orthos$file[k])
-   xy <- vp_temp_reproject(xyz[, 1], xyz[, 2], plot_crs, r)                         # TEMPORARY: plot centers in DEM's CRS
+   xy <- project_xy(xyz[, 1], xyz[, 2], plot_crs, r)                               # plot centers in DEM's CRS
    p$dem_height <- extract(r, xy)[, 1]
    p$dz <- p$dem_height - p$rtk_height
 

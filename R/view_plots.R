@@ -17,9 +17,8 @@
 #' for each DEM at the site. If `plots` doesn't have a
 #' `site` column, all plots are assigned to the first site in `orthos.txt`.
 #'
-#' **TEMPORARY:** plot centers are reprojected on the fly into each ortho's CRS (see
-#' `vp_temp_reproject`), because the July 2026 orthos are in NAD83(1986) rather than
-#' NAD83(2011). Remove this once orthos are delivered in EPSG:6491.
+#' Plot centers are projected on the fly into each ortho's CRS (see `project_xy`), as orthos
+#' may be in EPSG:6491 or UTM 19N. This is a projection change only, with no datum shift.
 #'
 #' `view_plots` includes the following controls:
 #'
@@ -252,7 +251,7 @@ view_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
       get_ortho <- function(f) {                                                          # load (and cache) ortho or DEM
          if(is.null(ortho_cache[[f]])) {
             o <- vp_load_ortho(f, orthos$type[match(f, orthos$file)])
-            o$xy <- vp_temp_reproject(plots$easting, plots$northing, plot_crs, o$rast)    # TEMPORARY: plot centers in ortho's CRS
+            o$xy <- project_xy(plots$easting, plots$northing, plot_crs, o$rast)          # plot centers in ortho's CRS
             ortho_cache[[f]] <- o
          }
          ortho_cache[[f]]

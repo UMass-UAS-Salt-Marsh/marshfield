@@ -27,6 +27,7 @@ export(fix_species)
 export(flag_rtk)
 export(format_sections)
 export(gather_rtk)
+export(gcp)
 export(get_photos)
 export(get_plots)
 export(make_site)
@@ -56,11 +57,17 @@ importFrom(dplyr,
   group_by,
   summarise
 )
+importFrom(filelock,
+  lock,
+  unlock
+)
 importFrom(grDevices,
   as.raster,
   col2rgb,
   colorRamp,
   dev.off,
+  gray,
+  gray.colors,
   hcl.colors,
   png,
   rgb
@@ -109,7 +116,8 @@ importFrom(sf,
   st_sf,
   st_transform,
   st_union,
-  st_write
+  st_write,
+  st_zm
 )
 importFrom(shiny,tags)
 importFrom(shinybusy,add_busy_spinner)
@@ -134,6 +142,7 @@ importFrom(terra,
   rast,
   res,
   shade,
+  sources,
   spatSample,
   terrain,
   vect,

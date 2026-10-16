@@ -33,9 +33,10 @@ sf point data frame of results, invisibly
 \description{
 Samples a DEM at each plot center and computes \code{dz} = DEM - RTK height (m). Positive \code{dz}
 is expected where the DEM includes vegetation; spatially coherent patches of large
-positive or negative \code{dz} suggest vertical warping in the DEM. Writes
+positive or negative \code{dz} suggest vertical warping in the DEM.
 }
 \details{
+Writes
 \itemize{
 \item \verb{results/dz_<dem>.gpkg}, a point layer in the plots' CRS (EPSG:6491) with \code{plot_id},
 \code{date}, \code{rtk_id}, \code{section}, \code{subclass}, \code{subclass_name}, \code{rtk_height} (in the DEM's

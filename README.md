@@ -5,6 +5,20 @@ samples on the fly, and processing collected data.
 
 Companion package to [marshmap](https://github.com/UMass-UAS-Salt-Marsh/marshmap).
 
+## Loading the library
+
+If the package isn't installed on your computer (ski this on MassMarsh servers):
+
+```
+devtools::install_github("UMass-UAS-Salt-Marsh/marshfield")
+```
+
+Then load the library:
+
+```
+library(marshfield)
+```
+
 ## Preparing for field season
 
 - `tides` Summarize NOAA tide predictions for field work planning
@@ -83,18 +97,12 @@ Companion package to [marshmap](https://github.com/UMass-UAS-Salt-Marsh/marshmap
 
 - `review.txt` Written by `view_plots`, used to drop rejected plots. DO NOT EDIT!
 
+
 ## Post-processing orthophotos
 
 - `finish_orthos` Finish orthophotos after a Metashape run: compressing/set nodata/statistics/overviews
 
-Use this function after an Agrisoft Metashape run to finalize orthophotos. From R, load the library with
-
-```
-# devtools::install_github("UMass-UAS-Salt-Marsh/marshfield")   # already done on marsh01 and marsh02
-library(marshfield)
-```
-
-Call `finish_orthos` like this
+Use this function after an Agrisoft Metashape run to finalize orthophotos and DEMs. Call `finish_orthos` like this
 
 ```
 finish_orthos(c('esx_2026_08_07_mid_micap_ortho.tif', 'esx_2026_08_14_high_micap_ortho.tif', 
@@ -102,9 +110,15 @@ finish_orthos(c('esx_2026_08_07_mid_micap_ortho.tif', 'esx_2026_08_14_high_micap
 ```
 This will process three orthophotos in `U:/projects/uas_veg/sites/ESX/orthos_raw` (the default
 project is `uas_veg`), writing them to `U:/projects/uas_veg/sites/ESX/orthos`. By default, the 
-files are compressed, nodata is set to 65535, statistics are calculated, and overviews are built.
+files are compressed, nodata is set appropriately, statistics are calculated, and overviews are built.
 By default, raw orthophotos are in `orthos_raw`, and are written as final versions to `orthos` in
 the base and site directory. See `help(finish_orthos)` for details.
+
+```
+finish_orthos(c('esx_2026_07_20_low_micap_dem.tif', 
+   'esx_2026_08_21_mid_micap_dem.tif'), site = 'esx', type = 'dem')
+```
+Does the same for two DEMs.
 
 Another example, for the crab project, this time without overviews:
 
@@ -112,3 +126,18 @@ Another example, for the crab project, this time without overviews:
 finish_orthos(c('wel_2026_08_26_mid_micap_130ft_ortho.tif', 'wel_2026_08_26_mid_micap_100ft_ortho.tif'), 
 site = 'WEL', base_path = 'U:/projects/uas_crab/<site>', overviews = FALSE)
 ```
+
+## Assessing orthophotos
+
+- `gcp` Assess orthophotos and DEMs against ground control points, across projects and sites.
+   Steps through the GCPs at a site; double-click the center of each target to record its XY
+   error (and, on DEMs, Z error) in `<site>/gcp_review.txt`. Sites are locked while in use, so
+   several people can work at once.
+
+Run `finish_orthos` before running `gcp` if you've created new raw orthophotos or DEMs.
+
+GCPs are read from `<site>/gcp_placement/vector`, and are never written: if the raw RTK files
+in `<site>/gcp_placement/raw` are newer, `gcp` says so and leaves converting them to
+`gather_rtk`. Suspect coordinate reference systems are reported rather than silently corrected
+--- a NAD83 vs. NAD83(2011) mismatch is about a meter here, the same size as the error being
+measured, and DEMs are often in ellipsoidal heights rather than NAVD88.

@@ -36,9 +36,8 @@ from \code{results/everything.gpkg}). DEM - RTK height at plot center is display
 for each DEM at the site. If \code{plots} doesn't have a
 \code{site} column, all plots are assigned to the first site in \code{orthos.txt}.
 
-\strong{TEMPORARY:} plot centers are reprojected on the fly into each ortho's CRS (see
-\code{vp_temp_reproject}), because the July 2026 orthos are in NAD83(1986) rather than
-NAD83(2011). Remove this once orthos are delivered in EPSG:6491.
+Plot centers are projected on the fly into each ortho's CRS (see \code{project_xy}), as orthos
+may be in EPSG:6491 or UTM 19N. This is a projection change only, with no datum shift.
 
 \code{view_plots} includes the following controls:
 \itemize{
