@@ -12,7 +12,9 @@ avenza_qr <- function(base = 'C:/Work/R/marshfield/inst',
                          ortho           = 'https://marsh01.ecs.umass.edu/share/uas/uas2026/essex2025.tif',
                          open_space      = 'https://marsh01.ecs.umass.edu/share/uas/uas2026/open_space.zip',
                          target_sections = 'https://marsh01.ecs.umass.edu/share/uas/uas2026/castle_sections.zip',
-                         work_areas      = 'https://marsh01.ecs.umass.edu/share/uas/uas2026/work_areas.zip'
+                         work_areas      = 'https://marsh01.ecs.umass.edu/share/uas/uas2026/work_areas.zip',
+                         plots_min       = 'https://marsh01.ecs.umass.edu/share/uas/uas2026/plots_min.zip',
+                         uas_aug21       = 'https://marsh01.ecs.umass.edu/share/uas/uas2026/uas_aug21.tif'
                       )) {
 
 
