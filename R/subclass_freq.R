@@ -1,6 +1,8 @@
 #' Summzarize subclass frequency for within-field season updates
 #'
-#' Pulls draft database from UMass UAS 2026 field plots and summarizes subclass counts.
+#' Pulls draft database from UMass UAS 2026 field plots and summarizes subclass counts. The subclass
+#' frequency table is written to `results/subclass_freqs.txt` (tab-delimited), in the directory above
+#' `source`'s directory.
 #'
 #' Note some ugly hard-coded fixes: test data are dropped, and a missing date is added.
 #'
@@ -9,7 +11,7 @@
 #' @returns List of
 #'    - data = Full dataset
 #'    - z = Summarized data
-#' @importFrom utils read.csv
+#' @importFrom utils read.csv write.table
 #' @importFrom dplyr distinct
 
 
@@ -57,6 +59,11 @@ subclass_freq <- function(source = 'C:/Work/saltmarsh/data/uas2026/field/plots/v
 
    cat('Subclass count\n')
    print(z)
+
+   pathR <- file.path(dirname(dirname(source)), 'results')                    # results path, alongside plots/
+   if(!dir.exists(pathR))
+      dir.create(pathR, recursive = TRUE)
+   write.table(z, file.path(pathR, 'subclass_freqs.txt'), sep = '\t', row.names = FALSE, quote = FALSE, na = '')
 
    invisible(list(data = data, z = z))
 }

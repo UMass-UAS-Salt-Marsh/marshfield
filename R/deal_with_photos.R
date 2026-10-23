@@ -23,8 +23,11 @@ deal_with_photos <- function(plots, path) {
    cat('\nCopying photos to ', p, '...\n', sep = '')
    r <- file.path(p, paste0(plots$plot_id[b], '.jpg'))
    ok <- file.copy(f, r, recursive = FALSE)
-   if(any(!ok))
-      message('Error copying ', sum(!ok), ' photos')
+   if(any(!ok)) {
+      message('Error copying ', sum(!ok), ' photos (run get_plots with get_photos = TRUE to download new photos):')
+      print(data.frame(plot_id = plots$plot_id[b][!ok], photo_filename = basename(plots$photo_filename[b][!ok])),
+            quote = FALSE, row.names = FALSE, right = FALSE)
+   }
 
    cat('Reading EXIF data...\n')
    e <- exifr::read_exif(r[ok], tags = c('DateTimeOriginal', 'GPSLatitude', 'GPSLongitude')) |>   # get EXIF data from plot photos

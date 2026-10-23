@@ -14,9 +14,9 @@ A vector of RTK ids with the formatting cleaned up
 }
 \description{
 Valid ids are in the form \if{html}{\out{<RTK unit>}}\if{html}{\out{<month>}}\if{html}{\out{<day>}}-\if{html}{\out{<point no>}}. Valid RTK units are W, X, Y, Z,
-optionally followed by a digit. Valid month letters are J - July, A - August. The day should be 2
-digits and the point number is 3 digits, all with leading zeros. All characters are uppercase.
-This function makes the formatting corrections.
+optionally followed by a digit. Valid month letters are J - July, A - August, S - September,
+O - October, N - November, D - December. The day should be 2 digits and the point number is 3 digits,
+all with leading zeros. All characters are uppercase. This function makes the formatting corrections.
 }
 \details{
 To check whether an RTK id is valid (ignoring) formatting niceties, use the companion function

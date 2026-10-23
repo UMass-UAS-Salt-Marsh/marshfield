@@ -1,9 +1,9 @@
 #' Clean RTK ids for UMass UAS 2026
 #'
 #' Valid ids are in the form <RTK unit><month><day>-<point no>. Valid RTK units are W, X, Y, Z,
-#' optionally followed by a digit. Valid month letters are J - July, A - August. The day should be 2
-#' digits and the point number is 3 digits, all with leading zeros. All characters are uppercase.
-#' This function makes the formatting corrections.
+#' optionally followed by a digit. Valid month letters are J - July, A - August, S - September,
+#' O - October, N - November, D - December. The day should be 2 digits and the point number is 3 digits,
+#' all with leading zeros. All characters are uppercase. This function makes the formatting corrections.
 #'
 #' To check whether an RTK id is valid (ignoring) formatting niceties, use the companion function
 #' `valid_rtkids`.
@@ -21,7 +21,7 @@ clean_rtkids <- function(x) {
 
    for(i in seq_along(y))                       # if there's a section number, drop it and include a digit (0) in the RTK id if there isn't one
       if(l[i] == 3)
-         y[[i]] <- c(sub('^([WXYZ])([JA])', '\\10\\2', y[[i]][[1]]), y[[i]][[3]])
+         y[[i]] <- c(sub('^([WXYZ])([JASOND])', '\\10\\2', y[[i]][[1]]), y[[i]][[3]])
 
 
    w <- sapply(y, length) == 2                  # we're only going to work with ids that have two elements (after fixing 3)
@@ -29,8 +29,8 @@ clean_rtkids <- function(x) {
    y1 <- sapply(y[w], '[[', 1)                  # part 1: RTK unit and date
    y2 <- sapply(y[w], '[[', 2)                  # part 2: point number
 
-   u <- sub('^([WXYZ]\\d?[JA]).*', '\\1', y1)   # RTK unit (with optional digit) and month
-   d <- sub('^[WXYZ]\\d?[JA]', '', y1)          # day
+   u <- sub('^([WXYZ]\\d?[JASOND]).*', '\\1', y1)  # RTK unit (with optional digit) and month
+   d <- sub('^[WXYZ]\\d?[JASOND]', '', y1)         # day
    y1 <- paste0(u, sprintf('%02d', suppressWarnings(as.numeric(d))))
    y2 <- sprintf('%03d', suppressWarnings(as.numeric(y2)))
 

@@ -1,9 +1,9 @@
 #' Clean plot ids for UMass UAS 2026
 #'
 #' Valid ids are in the form <tablet letter><month><day>-<section>-<plot no>. Valid tablet letters are
-#' B - blue, P - pink, J - jet black. Valid month letters are J - July, A - August. The day should be 2
-#' digits, the section is 2 digits, and the plot number is 3 digits, all with leading zeros. All characters
-#' are uppercase. This function makes the formatting corrections. If the plot id has only 2 parts, the
+#' B - blue, P - pink, J - jet black. Valid month letters are J - July, A - August, S - September,
+#' O - October, N - November, D - December. The day should be 2 digits, the section is 2 digits, and the
+#' plot number is 3 digits, all with leading zeros. All characters are uppercase. This function makes the formatting corrections. If the plot id has only 2 parts, the
 #' section is assumed to be 00.
 #'
 #' To check whether a plot id is valid (ignoring) formatting niceties, use the companion function

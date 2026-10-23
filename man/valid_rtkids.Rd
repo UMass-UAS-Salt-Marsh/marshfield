@@ -14,5 +14,6 @@ TRUE for elements that are valid
 }
 \description{
 Valid ids are in the form \if{html}{\out{<RTK unit>}}\if{html}{\out{<month>}}\if{html}{\out{<day>}}-\if{html}{\out{<point no>}}. Valid RTK units are
-W, X, Y, Z, optionally followed by a digit. Valid month letters are J - July, A - August.
+W, X, Y, Z, optionally followed by a digit. Valid month letters are J - July, A - August,
+S - September, O - October, N - November, D - December.
 }

@@ -17,10 +17,10 @@ get_photos <- function(urls, dest_dir = 'C:/Work/saltmarsh/data/uas2026/field/ph
    if(any(duplicated(dests)))
       stop('There are duplicate URLs!')
 
-   message('Downloading ', length(dests), ' photos from the server...')
+   new <- which(!file.exists(dests))            # resumable: only get photos we don't already have
+   message('Downloading ', length(new), ' new photos from the server (', length(dests) - length(new), ' already downloaded)...')
 
-   for (i in seq_along(urls)) {
-      if (file.exists(dests[i])) next          # resumable
+   for (i in new) {
       tryCatch(
          curl::curl_download(urls[i], dests[i], mode = "wb"),
          error = function(e) message("Failed: ", urls[i], " - ", conditionMessage(e))

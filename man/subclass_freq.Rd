@@ -22,7 +22,9 @@ List of
 }
 }
 \description{
-Pulls draft database from UMass UAS 2026 field plots and summarizes subclass counts.
+Pulls draft database from UMass UAS 2026 field plots and summarizes subclass counts. The subclass
+frequency table is written to \code{results/subclass_freqs.txt} (tab-delimited), in the directory above
+\code{source}'s directory.
 }
 \details{
 Note some ugly hard-coded fixes: test data are dropped, and a missing date is added.

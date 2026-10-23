@@ -14,5 +14,6 @@ TRUE for elements that are valid
 }
 \description{
 Valid ids are in the form \if{html}{\out{<tablet letter>}}\if{html}{\out{<month>}}\if{html}{\out{<day>}}-\if{html}{\out{<section>}}-\if{html}{\out{<plot no>}}. Valid tablet letters are
-B - blue, P - pink, J - jet black. Valid month letters are J - July, A - August.
+B - blue, P - pink, J - jet black. Valid month letters are J - July, A - August, S - September,
+O - October, N - November, D - December.
 }

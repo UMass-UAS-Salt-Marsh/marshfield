@@ -14,9 +14,9 @@ A vector of plot ids with the formatting cleaned up
 }
 \description{
 Valid ids are in the form \if{html}{\out{<tablet letter>}}\if{html}{\out{<month>}}\if{html}{\out{<day>}}-\if{html}{\out{<section>}}-\if{html}{\out{<plot no>}}. Valid tablet letters are
-B - blue, P - pink, J - jet black. Valid month letters are J - July, A - August. The day should be 2
-digits, the section is 2 digits, and the plot number is 3 digits, all with leading zeros. All characters
-are uppercase. This function makes the formatting corrections. If the plot id has only 2 parts, the
+B - blue, P - pink, J - jet black. Valid month letters are J - July, A - August, S - September,
+O - October, N - November, D - December. The day should be 2 digits, the section is 2 digits, and the
+plot number is 3 digits, all with leading zeros. All characters are uppercase. This function makes the formatting corrections. If the plot id has only 2 parts, the
 section is assumed to be 00.
 }
 \details{
