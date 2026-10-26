@@ -69,6 +69,7 @@ Result tables are written as tab-delimited text to path/results:
 \item \code{rtk} RTK data, including dropped rows
 \item \code{sessions} Original session data from \code{saltmarshdata} app
 \item \code{rtk_seq} RTK sequencing check; \code{rtk_nonseq} marks potential sequencing errors
+\item \code{field_effort} Number of plots by site, date, tablet, observers, and section (also displayed)
 }
 
 In addition, the tables are saved as global varibles.

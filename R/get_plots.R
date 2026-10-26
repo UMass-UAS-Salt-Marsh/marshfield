@@ -42,6 +42,7 @@
 #' - `rtk` RTK data, including dropped rows
 #' - `sessions` Original session data from `saltmarshdata` app
 #' - `rtk_seq` RTK sequencing check; `rtk_nonseq` marks potential sequencing errors
+#' - `field_effort` Number of plots by site, date, tablet, observers, and section (also displayed)
 #'
 #' In addition, the tables are saved as global varibles.
 #'
@@ -186,14 +187,18 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    check_pct_cover(plots, pct_cover)                                       # check percent cover for out of range errors
 
 
-   cat('\n-----\n\n')
-   subclasses(plots)                                                       # print table of frequency counts by subclass
-
-
-   cat('\n\nWriting result files...\n')                                    #----------- write results
    pathR <- file.path(path, 'results')                                     # results path
    if(!dir.exists(pathR))                                                  # make sure result directory exists
       dir.create(pathR, recursive = TRUE)
+
+
+   cat('\n-----\n\n')
+   subclasses(plots)                                                       # print table of frequency counts by subclass
+   cat('\n-----\n')
+   field_effort(plots, pathR)                                              # print and write field effort by day, tablet, observers, and section
+
+
+   cat('\n\nWriting result files...\n')                                    #----------- write results
 
 
    # write GeoPackages
