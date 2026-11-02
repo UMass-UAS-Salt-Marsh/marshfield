@@ -49,6 +49,7 @@ Full observer names are in observers.txt.
 \item \code{dedup_rtk.txt} Drop duplicated RTKs with same rtk_id: \code{rtk_id}, \code{seq}, \code{new}, \code{reason}
 \item \code{fix_species.txt} Change genera incorrectly listed as species by app in percent cover
 \item \code{fix_pct_cover.txt} Changes to percent cover fields: \code{plot_id}, \code{species_code}, \code{pct_cover}, \code{reason}
+\item \code{fix_subclass.txt} Changes to subclass: \code{plot_id}, \code{subclass}, \code{reason}
 \item \code{review.txt} Written by \code{view_plots}, used to drop rejected plots. DO NOT EDIT!
 }
 

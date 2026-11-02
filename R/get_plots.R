@@ -24,6 +24,7 @@
 #'
 #' - `fix_species.txt` Change genera incorrectly listed as species by app in percent cover
 #' - `fix_pct_cover.txt` Changes to percent cover fields: `plot_id`, `species_code`, `pct_cover`, `reason`
+#' - `fix_subclass.txt` Changes to subclass: `plot_id`, `subclass`, `reason`
 #'
 #' - `review.txt` Written by `view_plots`, used to drop rejected plots. DO NOT EDIT!
 #'
@@ -115,6 +116,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
    plots <- plots[!duplicated(plots$plot_id), ]                            # split out percent cover to a separate table and collapse plots table
 
    pct_cover <- fix_pctcover(pct_cover, path)                              # fix errors in percent cover according to fix_pct_cover.txt
+   plots <- fix_subclass(plots, path)                                      # fix incorrect subclasses according to fix_subclass.txt
 
    # clean up plots table some more
    plots$site <- 'ESX'                                                     # all plots are for site ESX
@@ -192,8 +194,12 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
       dir.create(pathR, recursive = TRUE)
 
 
+   cat('\n-----\n\nTen plots with worst RTK error\n\n')
+   print(head(plots[order(plots$lateral_rms, decreasing = TRUE), c('plot_id', 'date', 'subclass', 'section', 'notes', 'lateral_rms')], 10), row.names = FALSE)
+
    cat('\n-----\n\n')
    subclasses(plots)                                                       # print table of frequency counts by subclass
+
    cat('\n-----\n')
    field_effort(plots, pathR)                                              # print and write field effort by day, tablet, observers, and section
 
