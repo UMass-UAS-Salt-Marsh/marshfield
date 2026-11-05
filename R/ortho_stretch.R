@@ -83,6 +83,10 @@ ortho_stats_quantiles <- function(r, probs) {
 
       w <- (hi - lo) / length(cnt)                                            # bucket centers
       mid <- lo + w * (seq_along(cnt) - 0.5)
+      cnt[abs(mid - 65535) <= w / 2] <- 0                                     # drop MicaSense nodata, which sidecars not
+                                                                              # written by finish_orthos count as data
+      if(sum(cnt) == 0)
+         return(NULL)
       cum <- cumsum(cnt) / sum(cnt)
       k <- !duplicated(cum)                                                   # flat runs of the CDF (empty buckets)
       if(sum(k) < 2)
