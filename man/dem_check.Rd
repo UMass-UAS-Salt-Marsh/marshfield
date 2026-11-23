@@ -6,24 +6,39 @@
 \usage{
 dem_check(
   dem,
+  site = NULL,
+  ellipsoidal = NULL,
   basemap = NULL,
   limit = 1.2,
-  path = "C:/Work/saltmarsh/data/uas2026/field",
-  ortho_path = "C:/Work/saltmarsh/data/uas2026/orthos",
-  classes = "C:/Work/saltmarsh/pars/classes.txt"
+  path = "U:/projects/uas_veg/sites/<site>/field",
+  dem_path = "U:/projects/uas_veg/sites/<site>/dem",
+  ortho_path = "U:/projects/uas_veg/sites/<site>/orthos",
+  classes = "U:/projects/uas_veg/marshmap/pars/classes.txt"
 )
 }
 \arguments{
-\item{dem}{Name of the DEM in \code{orthos.txt} (e.g., 'Jul 20 low DEM')}
+\item{dem}{The DEM: a file name (ending in \code{.tif}), relative to \code{dem_path} or a full path, or
+the name of a DEM in \code{orthos.txt} (e.g., 'Jul 20 low DEM')}
 
-\item{basemap}{Name of the RGB ortho in \code{orthos.txt} to use as a basemap; default is the first
-RGB ortho for the same site}
+\item{site}{Optional site abbreviation (e.g., 'esx'), inserted in place of \verb{<site>} in paths.
+If omitted, paths that are used must be complete.}
+
+\item{ellipsoidal}{TRUE if you believe the DEM is in ellipsoidal heights, FALSE if NAVD88, or
+NULL (default) to go by the heights (and \code{orthos.txt}, if any). The heights win if they
+clearly disagree.}
+
+\item{basemap}{RGB ortho to use as a basemap: a file name relative to \code{ortho_path} or a full
+path, or a name in \code{orthos.txt}. Default is the first RGB ortho for the same site in
+\code{orthos.txt}, or else the ortho matching the DEM's file name (\verb{_dem} -> \verb{_ortho}) in
+\code{ortho_path}, or else none.}
 
 \item{limit}{Color scale runs from \code{-limit} to \code{limit} m; larger values are clamped}
 
 \item{path}{Path to field data}
 
-\item{ortho_path}{Path to orthoimages and DEMs}
+\item{dem_path}{Path to DEMs, for DEMs given by relative file name}
+
+\item{ortho_path}{Path to orthoimages, for basemaps and files in \code{orthos.txt}}
 
 \item{classes}{Path to classes table, used for subclass names}
 }
@@ -44,6 +59,17 @@ vertical datum), \code{dem_height}, and \code{dz}.
 \item \verb{results/dz_<dem>.png}, a map of \code{dz} over a faded orthophoto, with section labels.
 }
 
-The DEM and its vertical datum come from \code{pars/orthos.txt} (see \code{view_plots}). Plot centers
-are put into the DEM's CRS as in \code{view_plots} (including the TEMPORARY datum shift).
+The only field data needed are \code{results/plots.gpkg} and, for ellipsoidal DEMs,
+\code{results/everything.gpkg}, so DEMs can be checked before the rest of the field processing.
+\code{pars/orthos.txt} (see \code{view_plots}) is optional: if it's there, DEMs and basemaps can be
+given by name, and a DEM given by file name picks up its \code{vdatum}. Plot centers are put into
+the DEM's CRS as in \code{view_plots} (including the TEMPORARY datum shift).
+
+The DEM's vertical datum is inferred from the heights rather than taken on trust: DEMs often
+declare none, and NAVD88 and ellipsoidal heights differ by the geoid separation (~27 m here),
+so a wrong guess would make every \code{dz} meaningless. Whichever of the plots' NAVD88 heights
+(from \code{plots.gpkg}) or ellipsoidal heights (from \code{everything.gpkg}) the DEM matches is used
+(see \code{gcp_vdatum}). If that disagrees with \code{ellipsoidal} or with \code{orthos.txt} you're told;
+if the heights match neither, \code{ellipsoidal} or \code{orthos.txt} is used with a warning, or NAVD88
+if neither says.
 }
