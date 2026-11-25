@@ -41,7 +41,6 @@
 #' - `dropped` Plots data, all fields, dropped rows
 #' - `pct_cover` Percent cover, to join with `plots` on `plot_id`
 #' - `rtk` RTK data, including dropped rows
-#' - `sessions` Original session data from `saltmarshdata` app
 #' - `rtk_seq` RTK sequencing check; `rtk_nonseq` marks potential sequencing errors
 #' - `field_effort` Number of plots by site, date, tablet, observers, and section (also displayed)
 #'
@@ -220,7 +219,7 @@ get_plots <- function(path = 'C:/Work/saltmarsh/data/uas2026/field',
 
 
    # write tables
-   tables <- c('plots', 'everything', 'dropped', 'rtk', 'pct_cover', 'sessions', 'auxil', 'rtk_seq')
+   tables <- c('plots', 'everything', 'dropped', 'rtk', 'pct_cover', 'auxil', 'rtk_seq')
    for(v in tables) {                                                                                 # for each table
       x <- get(v)
       write.table(x, file.path(pathR, paste0(v, '.txt')),
